@@ -46,15 +46,24 @@ h1 {
   cursor: pointer;
   font-weight: bold; /* Make text bold */
   color: black; /* Make X and O black */
+  position: relative; /* Needed for positioning the line */
 }
 
 .cell:hover {
   background-color: #ddd;
 }
 
-.winning-cell {
-  background-color: #4caf50 !important; /* Highlight winning cells with a green background */
-  color: white;
+/* Winning line - Draw a line across the winning cells */
+.cell.winning-cell::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  width: 80%;
+  height: 3px;
+  background-color: #4caf50; /* Green line */
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
 #result {
