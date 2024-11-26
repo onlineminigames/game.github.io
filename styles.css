@@ -101,19 +101,6 @@ h1 {
   .cell {
     width: 80px;
     height: 80px;
-    font-size: 2.5em; /* Adjust font size on mobile */
-  }
-
-  #board {
-    width: 240px; /* Adjusted for mobile screens */
-  }
-
-  #reset {
-    padding: 8px 16px;
-    font-size: 0.9em;
-  }
-
-  #scoreboard p {
-    font-size: 1em;
+    font-size: 2.5em; /* Adjust font size for mobile */
   }
 }
