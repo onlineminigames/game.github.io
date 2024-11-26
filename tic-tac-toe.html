@@ -1,116 +1,325 @@
-/* General body styling */
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: linear-gradient(135deg, #2b5876, #4e4376);
-  color: white;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    /* General body styling */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #2b5876, #4e4376);
+      color: white;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
 
-/* Title styling */
-h1 {
-  margin-top: 20px;
-  font-size: 2.5em;
-  margin-bottom: 20px;
-}
+    /* Title styling */
+    h1 {
+      margin-top: 20px;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
 
-#game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
-}
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
 
-.scoreboard {
-  font-size: 1.2em;
-  margin-bottom: 20px;
-}
+    .scoreboard {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
 
-#board {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 5px;
-  justify-content: center;
-  margin-top: 20px;
-  width: 270px;  /* Fixed width for proper display */
-  max-width: 100%; /* Allow for smaller screens */
-  margin-left: auto;
-  margin-right: auto;
-}
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 5px;
+      justify-content: center;
+      margin-top: 20px;
+      width: 270px;  /* Fixed width for proper display */
+      max-width: 100%; /* Allow for smaller screens */
+      margin-left: auto;
+      margin-right: auto;
+    }
 
-.cell {
-  width: 90px;
-  height: 90px;
-  background: #f4f4f4;
-  border: 1px solid #000;
-  font-size: 3em; /* Increased font size */
-  text-align: center;
-  line-height: 90px; /* Centers text vertically */
-  cursor: pointer;
-  font-weight: bold; /* Make text bold */
-  color: black; /* Make X and O black */
-  position: relative; /* Needed for positioning the line */
-}
+    .cell {
+      width: 90px;
+      height: 90px;
+      background: #f4f4f4;
+      border: 1px solid #000;
+      font-size: 3em; /* Increased font size */
+      text-align: center;
+      line-height: 90px; /* Centers text vertically */
+      cursor: pointer;
+      font-weight: bold; /* Make text bold */
+      color: black; /* Make X and O black */
+      position: relative; /* Needed for positioning the line */
+    }
 
-.cell:hover {
-  background-color: #ddd;
-}
+    .cell:hover {
+      background-color: #ddd;
+    }
 
-/* Draw a line across winning cells */
-.cell.winning-cell::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 5px;
-  width: 80%;
-  height: 3px;
-  background-color: #4caf50; /* Green line */
-  transform: translateY(-50%);
-  z-index: 2;
-}
+    /* Draw a line across winning cells */
+    .cell.winning-cell::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 5px;
+      width: 80%;
+      height: 3px;
+      background-color: #4caf50; /* Green line */
+      transform: translateY(-50%);
+      z-index: 2;
+    }
 
-#result {
-  margin-top: 10px;
-  font-size: 1.5em;
-  font-weight: bold;
-}
+    #result {
+      margin-top: 10px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
 
-#reset {
-  background-color: #ff5722;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1em;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-}
+    #reset {
+      background-color: #ff5722;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
 
-#reset:hover {
-  background-color: #e64a19;
-}
+    #reset:hover {
+      background-color: #e64a19;
+    }
 
-.back-button {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: #ff5722;
-  color: white;
-  text-decoration: none;
-  padding: 10px;
-  border-radius: 5px;
-}
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #ff5722;
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 5px;
+    }
 
-@media (max-width: 600px) {
-  #board {
-    grid-template-columns: repeat(3, 1fr);
-    width: 250px;
-  }
+    @media (max-width: 600px) {
+      #board {
+        grid-template-columns: repeat(3, 1fr);
+        width: 250px;
+      }
 
-  .cell {
-    font-size: 2.5em;
-    line-height: 80px;
-  }
-}
+      .cell {
+        font-size: 2.5em;
+        line-height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+
+  <div id="game-container">
+    <div class="scoreboard">
+      <p>Wins: <span id="wins">0</span></p>
+      <p>Losses: <span id="losses">0</span></p>
+      <p>Draws: <span id="draws">0</span></p>
+    </div>
+
+    <div id="board"></div>
+    <div id="result"></div>
+    <button id="reset">Reset Game</button>
+  </div>
+
+  <a href="index.html" class="back-button">Back to Menu</a>
+
+  <script>
+    const boardElement = document.getElementById("board");
+    const resultElement = document.getElementById("result");
+    const resetButton = document.getElementById("reset");
+    let boardState = Array(9).fill(""); // Represents the board (3x3)
+    const player = "X";
+    const robot = "O";
+
+    // Load scoreboard
+    let scores = JSON.parse(localStorage.getItem("tictactoe-scores")) || {
+      wins: 0,
+      losses: 0,
+      draws: 0,
+    };
+
+    // Flag to check if the game is over
+    let gameOver = false;
+    let winningCombo = [];
+
+    // Update scoreboard
+    function updateScoreboard() {
+      document.getElementById("wins").textContent = scores.wins;
+      document.getElementById("losses").textContent = scores.losses;
+      document.getElementById("draws").textContent = scores.draws;
+    }
+
+    function saveScores() {
+      localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
+    }
+
+    // Initialize the board
+    function createBoard() {
+      boardElement.innerHTML = ""; // Clear existing board
+      boardState.forEach((cell, index) => {
+        const cellElement = document.createElement("div");
+        cellElement.className = "cell";
+        cellElement.dataset.index = index;
+        cellElement.textContent = cell;
+        if (winningCombo.includes(index)) {
+          cellElement.classList.add("winning-cell");
+        }
+        cellElement.addEventListener("click", handlePlayerMove);
+        boardElement.appendChild(cellElement);
+      });
+    }
+
+    // Handle player's move
+    function handlePlayerMove(event) {
+      if (gameOver) return; // Prevent moves if the game is over
+
+      const index = event.target.dataset.index;
+
+      // Ignore clicks on already filled cells
+      if (boardState[index] !== "" || checkWinner() || isBoardFull()) return;
+
+      boardState[index] = player; // Player's move
+      createBoard();
+
+      if (checkWinner() || isBoardFull()) return;
+
+      robotMove(); // Robot's turn
+    }
+
+    // Robot makes a smart move
+    function robotMove() {
+      if (gameOver) return; // Prevent robot's move if game is over
+
+      const bestMove = getBestMove();
+      boardState[bestMove] = robot; // Robot's move
+      createBoard();
+
+      checkWinner(); // Check for winner after robot's move
+      isBoardFull(); // Check for draw
+    }
+
+    // Function to get the best move for the robot
+    function getBestMove() {
+      const winningMoves = getWinningMove(robot); 
+      if (winningMoves.length > 0) {
+        return winningMoves[0]; // Robot takes the winning spot
+      }
+
+      const blockingMoves = getWinningMove(player);
+      if (blockingMoves.length > 0) {
+        return blockingMoves[0]; // Block the player's winning move
+      }
+
+      // If no immediate win or block, pick a random move
+      const emptyCells = boardState
+        .map((cell, index) => (cell === "" ? index : null))
+        .filter((index) => index !== null);
+
+      return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    }
+
+    // Function to check for a winning move (for either player or robot)
+    function getWinningMove(symbol) {
+      const winningMoves = [];
+      const winningCombos = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+
+      winningCombos.forEach((combo) => {
+        const [a, b, c] = combo;
+        const cells = [boardState[a], boardState[b], boardState[c]];
+        const emptyIndex = cells.indexOf(""); // Check if there's an empty spot in the combo
+        if (emptyIndex !== -1 && cells.filter(cell => cell === symbol).length === 2) {
+          winningMoves.push(combo[emptyIndex]);
+        }
+      });
+
+      return winningMoves;
+    }
+
+    // Check for winner
+    function checkWinner() {
+      const winningCombos = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+
+      for (let combo of winningCombos) {
+        const [a, b, c] = combo;
+        if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+          gameOver = true;
+          winningCombo = combo;
+
+          if (boardState[a] === player) {
+            scores.wins++;
+            resultElement.textContent = "You Win!";
+          } else {
+            scores.losses++;
+            resultElement.textContent = "You Lose!";
+          }
+          saveScores();
+          updateScoreboard();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Check if the board is full (draw)
+    function isBoardFull() {
+      if (boardState.every(cell => cell !== "")) {
+        gameOver = true;
+        scores.draws++;
+        resultElement.textContent = "It's a Draw!";
+        saveScores();
+        updateScoreboard();
+        return true;
+      }
+      return false;
+    }
+
+    // Reset the game
+    resetButton.addEventListener("click", () => {
+      boardState = Array(9).fill("");
+      gameOver = false;
+      winningCombo = [];
+      resultElement.textContent = "";
+      createBoard();
+    });
+
+    // Initialize the game
+    createBoard();
+    updateScoreboard();
+  </script>
+</body>
+</html>
