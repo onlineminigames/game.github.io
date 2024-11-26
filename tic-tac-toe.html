@@ -39,11 +39,11 @@
       grid-gap: 5px;
       justify-content: center;
       margin-top: 20px;
-      width: 270px;  /* Fixed width for proper display */
+      width: 270px;
       max-width: 100%;
       margin-left: auto;
       margin-right: auto;
-      position: relative; /* Ensure the line is drawn inside the grid */
+      position: relative;
     }
 
     .cell {
@@ -51,23 +51,17 @@
       height: 90px;
       background: #f4f4f4;
       border: 1px solid #000;
-      font-size: 3em; /* Increased font size */
+      font-size: 3em;
       text-align: center;
-      line-height: 90px; /* Centers text vertically */
+      line-height: 90px;
       cursor: pointer;
-      font-weight: bold; /* Make text bold */
-      color: black; /* Make X and O black */
-      position: relative; /* Needed for positioning the line */
+      font-weight: bold;
+      color: black;
+      position: relative;
     }
 
     .cell:hover {
       background-color: #ddd;
-    }
-
-    .winning-line {
-      position: absolute;
-      background-color: #4caf50; /* Green line */
-      z-index: 2;
     }
 
     #result {
@@ -171,41 +165,12 @@
         cellElement.dataset.index = index;
         cellElement.textContent = cell;
         if (winningCombo.includes(index)) {
-          cellElement.classList.add("winning-cell");
+          // Color winning cells
+          cellElement.style.backgroundColor = boardState[index] === player ? "green" : "red";
         }
         cellElement.addEventListener("click", handlePlayerMove);
         boardElement.appendChild(cellElement);
       });
-
-      // Draw line across winning cells
-      if (winningCombo.length > 0) {
-        drawWinningLine();
-      }
-    }
-
-    // Draw a line across the winning cells
-    function drawWinningLine() {
-      const cells = Array.from(boardElement.children);
-      const positions = winningCombo.map(index => cells[index]);
-
-      // Calculate the line position based on the winning combo
-      const rects = positions.map(cell => cell.getBoundingClientRect());
-      const startX = rects[0].left + rects[0].width / 2;
-      const startY = rects[0].top + rects[0].height / 2;
-      const endX = rects[2].left + rects[2].width / 2;
-      const endY = rects[2].top + rects[2].height / 2;
-
-      const line = document.createElement('div');
-      line.className = 'winning-line';
-      boardElement.appendChild(line);
-      
-      const width = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
-      const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
-
-      line.style.width = `${width}px`;
-      line.style.transform = `rotate(${angle}deg)`;
-      line.style.top = `${startY}px`;
-      line.style.left = `${startX - width / 2}px`;
     }
 
     // Handle player's move
