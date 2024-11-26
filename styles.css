@@ -52,6 +52,11 @@ h1 {
   background-color: #ddd;
 }
 
+.winning-cell {
+  background-color: #4caf50 !important; /* Highlight winning cells with a green background */
+  color: white;
+}
+
 #result {
   margin-top: 10px;
   font-size: 1.5em;
@@ -80,27 +85,18 @@ h1 {
   background: #ff5722;
   color: white;
   text-decoration: none;
-  font-size: 1.2em;
-  padding: 10px 15px;
-  border-radius: 10px;
+  padding: 10px;
+  border-radius: 5px;
 }
 
-#scoreboard {
-  margin-top: 20px;
-}
-
-#scoreboard p {
-  font-size: 1.2em;
-}
-
-@media screen and (max-width: 600px) {
-  h1 {
-    font-size: 2em;
+@media (max-width: 600px) {
+  #board {
+    grid-template-columns: repeat(3, 1fr);
+    width: 250px;
   }
 
   .cell {
-    width: 80px;
-    height: 80px;
-    font-size: 2.5em; /* Adjust font size for mobile */
+    font-size: 2.5em;
+    line-height: 80px;
   }
 }
