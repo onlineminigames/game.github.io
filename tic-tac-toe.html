@@ -66,15 +66,13 @@
     }
 
     /* Draw a line across winning cells */
-    .cell.winning-cell::after {
-      content: "";
+    .winning-line {
       position: absolute;
-      top: 50%;
-      left: 5px;
-      width: 80%;
+      width: 100%;
       height: 3px;
       background-color: #4caf50; /* Green line */
-      transform: translateY(-50%);
+      top: 50%;
+      left: 0;
       z-index: 2;
     }
 
@@ -184,6 +182,36 @@
         cellElement.addEventListener("click", handlePlayerMove);
         boardElement.appendChild(cellElement);
       });
+
+      // Draw line across winning cells
+      if (winningCombo.length > 0) {
+        drawWinningLine();
+      }
+    }
+
+    // Draw a line across the winning cells
+    function drawWinningLine() {
+      const cells = Array.from(boardElement.children);
+      const positions = winningCombo.map(index => cells[index]);
+
+      // Calculate the line position based on the winning combo
+      const rects = positions.map(cell => cell.getBoundingClientRect());
+      const startX = rects[0].left + rects[0].width / 2;
+      const startY = rects[0].top + rects[0].height / 2;
+      const endX = rects[2].left + rects[2].width / 2;
+      const endY = rects[2].top + rects[2].height / 2;
+
+      const line = document.createElement('div');
+      line.className = 'winning-line';
+      boardElement.appendChild(line);
+      
+      const width = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+      const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+
+      line.style.width = `${width}px`;
+      line.style.transform = `rotate(${angle}deg)`;
+      line.style.top = `${startY}px`;
+      line.style.left = `${startX - width / 2}px`;
     }
 
     // Handle player's move
@@ -249,19 +277,18 @@
         [2, 4, 6],
       ];
 
-      winningCombos.forEach((combo) => {
-        const [a, b, c] = combo;
-        const cells = [boardState[a], boardState[b], boardState[c]];
-        const emptyIndex = cells.indexOf(""); // Check if there's an empty spot in the combo
-        if (emptyIndex !== -1 && cells.filter(cell => cell === symbol).length === 2) {
-          winningMoves.push(combo[emptyIndex]);
+      winningCombos.forEach(combo => {
+        const cells = combo.map(index => boardState[index]);
+        const emptyCells = combo.filter((index) => boardState[index] === "");
+        if (emptyCells.length === 1 && cells.filter(cell => cell === symbol).length === 2) {
+          winningMoves.push(emptyCells[0]);
         }
       });
 
       return winningMoves;
     }
 
-    // Check for winner
+    // Check if the player or robot has won
     function checkWinner() {
       const winningCombos = [
         [0, 1, 2],
@@ -274,12 +301,11 @@
         [2, 4, 6],
       ];
 
-      for (let combo of winningCombos) {
+      for (const combo of winningCombos) {
         const [a, b, c] = combo;
         if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
           gameOver = true;
           winningCombo = combo;
-
           if (boardState[a] === player) {
             scores.wins++;
             resultElement.textContent = "You Win!";
