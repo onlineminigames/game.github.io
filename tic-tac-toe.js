@@ -12,6 +12,9 @@ let scores = JSON.parse(localStorage.getItem("tictactoe-scores")) || {
   draws: 0,
 };
 
+// Flag to check if the game is over
+let gameOver = false;
+
 function updateScoreboard() {
   document.getElementById("wins").textContent = scores.wins;
   document.getElementById("losses").textContent = scores.losses;
@@ -37,9 +40,11 @@ function createBoard() {
 
 // Handle player's move
 function handlePlayerMove(event) {
+  if (gameOver) return; // Prevent moves if the game is over
+
   const index = event.target.dataset.index;
 
-  // Ignore clicks on already filled cells or if the game is over
+  // Ignore clicks on already filled cells
   if (boardState[index] !== "" || checkWinner() || isBoardFull()) return;
 
   boardState[index] = player; // Player's move
@@ -52,6 +57,8 @@ function handlePlayerMove(event) {
 
 // Robot makes a random move
 function robotMove() {
+  if (gameOver) return; // Prevent robot's move if game is over
+
   const emptyCells = boardState
     .map((cell, index) => (cell === "" ? index : null))
     .filter((index) => index !== null);
@@ -86,6 +93,7 @@ function checkWinner() {
       else scores.losses++;
       saveScores();
       updateScoreboard();
+      gameOver = true; // Set gameOver flag to prevent further moves
       return true;
     }
   }
@@ -99,6 +107,7 @@ function isBoardFull() {
     scores.draws++;
     saveScores();
     updateScoreboard();
+    gameOver = true; // Set gameOver flag to prevent further moves
     return true;
   }
   return false;
@@ -106,9 +115,10 @@ function isBoardFull() {
 
 // Reset the game
 resetButton.addEventListener("click", () => {
-  boardState = Array(9).fill("");
-  resultElement.textContent = "";
+  boardState = Array(9).fill(""); // Reset the board
+  resultElement.textContent = ""; // Clear the result
   createBoard();
+  gameOver = false; // Reset the game over flag
 });
 
 // Initialize the game
