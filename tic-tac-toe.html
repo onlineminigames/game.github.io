@@ -3,23 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic Tac Toe</title>
+  <title>Tic-Tac-Toe Game</title>
   <link rel="stylesheet" href="styles.css">
-  <script defer src="tic-tac-toe.js"></script>
 </head>
 <body>
-  <a href="index.html" class="back-button">Back to Home</a>
-  <h1>Tic Tac Toe</h1>
+
+  <div class="back-button"><a href="index.html">Back to Home</a></div>
+
   <div id="game-container">
-    <div id="board"></div>
+    <h1>Tic-Tac-Toe</h1>
+    <div id="score">
+      <p id="score-X">X: 0</p>
+      <p id="score-O">O: 0</p>
+    </div>
+    <div id="board">
+      <div class="cell" id="cell-0"></div>
+      <div class="cell" id="cell-1"></div>
+      <div class="cell" id="cell-2"></div>
+      <div class="cell" id="cell-3"></div>
+      <div class="cell" id="cell-4"></div>
+      <div class="cell" id="cell-5"></div>
+      <div class="cell" id="cell-6"></div>
+      <div class="cell" id="cell-7"></div>
+      <div class="cell" id="cell-8"></div>
+    </div>
+
     <div id="result"></div>
-    <button id="reset">Restart Game</button>
+    <button id="reset">Reset Game</button>
   </div>
-  <div id="scoreboard">
-    <h2>Scoreboard</h2>
-    <p>Wins: <span id="wins">0</span></p>
-    <p>Losses: <span id="losses">0</span></p>
-    <p>Draws: <span id="draws">0</span></p>
-  </div>
+
+  <script src="tic-tac-toe.js"></script>
 </body>
 </html>
