@@ -55,20 +55,64 @@ function handlePlayerMove(event) {
   robotMove(); // Robot's turn
 }
 
-// Robot makes a random move
+// Robot makes a smart move
 function robotMove() {
   if (gameOver) return; // Prevent robot's move if game is over
 
-  const emptyCells = boardState
-    .map((cell, index) => (cell === "" ? index : null))
-    .filter((index) => index !== null);
-
-  const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  boardState[randomIndex] = robot; // Robot's move
+  const bestMove = getBestMove();
+  boardState[bestMove] = robot; // Robot's move
   createBoard();
 
   checkWinner(); // Check for winner after robot's move
   isBoardFull(); // Check for draw
+}
+
+// Function to get the best move for the robot
+function getBestMove() {
+  // First, try to win or block the player's winning move
+  const winningMoves = getWinningMove(robot); 
+  if (winningMoves.length > 0) {
+    return winningMoves[0]; // Robot takes the winning spot
+  }
+
+  const blockingMoves = getWinningMove(player);
+  if (blockingMoves.length > 0) {
+    return blockingMoves[0]; // Block the player's winning move
+  }
+
+  // If no immediate win or block, pick a random move
+  const emptyCells = boardState
+    .map((cell, index) => (cell === "" ? index : null))
+    .filter((index) => index !== null);
+
+  return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+}
+
+// Function to check for a winning move (for either player or robot)
+function getWinningMove(symbol) {
+  const winningMoves = [];
+  const winningCombos = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  winningCombos.forEach((combo) => {
+    const [a, b, c] = combo;
+    const cells = [boardState[a], boardState[b], boardState[c]];
+    const emptyIndex = cells.indexOf(""); // Check if there's an empty spot in the combo
+    if (emptyIndex !== -1 && cells.filter(cell => cell === symbol).length === 2) {
+      // If 2 cells are already filled with the symbol, return the empty spot
+      winningMoves.push(combo[emptyIndex]);
+    }
+  });
+
+  return winningMoves;
 }
 
 // Check for winner
