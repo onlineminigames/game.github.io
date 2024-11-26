@@ -1,3 +1,23 @@
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ff5722;
+  color: white;
+  text-decoration: none;
+  font-size: 1.2em;
+  padding: 10px 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background 0.2s;
+}
+.back-button:hover {
+  background: #e64a19;
+  transform: translateY(-3px);
+}
+
+
+
 body {
   font-family: Arial, sans-serif;
   text-align: center;
