@@ -36,3 +36,9 @@ h1 {
 #reset-btn:hover {
   background-color: #0056b3;
 }
+#scoreboard {
+  margin-top: 30px;
+}
+#scoreboard p {
+  font-size: 18px;
+}
