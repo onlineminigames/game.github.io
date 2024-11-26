@@ -14,7 +14,9 @@ let scores = JSON.parse(localStorage.getItem("tictactoe-scores")) || {
 
 // Flag to check if the game is over
 let gameOver = false;
+let winningCombo = [];
 
+// Update scoreboard
 function updateScoreboard() {
   document.getElementById("wins").textContent = scores.wins;
   document.getElementById("losses").textContent = scores.losses;
@@ -33,6 +35,9 @@ function createBoard() {
     cellElement.className = "cell";
     cellElement.dataset.index = index;
     cellElement.textContent = cell;
+    if (winningCombo.includes(index)) {
+      cellElement.classList.add("winning-cell");
+    }
     cellElement.addEventListener("click", handlePlayerMove);
     boardElement.appendChild(cellElement);
   });
@@ -133,11 +138,13 @@ function checkWinner() {
     if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
       resultElement.textContent =
         boardState[a] === player ? "You win!" : "You lose!";
+      winningCombo = combo; // Store the winning combination
       if (boardState[a] === player) scores.wins++;
       else scores.losses++;
       saveScores();
       updateScoreboard();
       gameOver = true; // Set gameOver flag to prevent further moves
+      createBoard(); // Re-render the board with the winning line
       return true;
     }
   }
@@ -161,6 +168,7 @@ function isBoardFull() {
 resetButton.addEventListener("click", () => {
   boardState = Array(9).fill(""); // Reset the board
   resultElement.textContent = ""; // Clear the result
+  winningCombo = [];
   createBoard();
   gameOver = false; // Reset the game over flag
 });
