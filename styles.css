@@ -24,12 +24,15 @@ h1 {
 }
 
 #board {
-  display: flex;
-  flex-wrap: wrap;
-  width: 300px;
-  margin-top: 20px;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 5px;
   justify-content: center;
+  margin-top: 20px;
+  width: 270px;  /* Fixed width for proper display */
+  max-width: 100%; /* Allow for smaller screens */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cell {
@@ -92,7 +95,7 @@ h1 {
   h1 {
     font-size: 2em;
   }
-  
+
   .cell {
     width: 80px;
     height: 80px;
@@ -100,7 +103,7 @@ h1 {
   }
 
   #board {
-    width: 240px;
+    width: 240px; /* Adjusted for mobile screens */
   }
 
   #reset {
