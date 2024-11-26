@@ -164,10 +164,16 @@
         cellElement.className = "cell";
         cellElement.dataset.index = index;
         cellElement.textContent = cell;
+
+        // Color winning cells
         if (winningCombo.includes(index)) {
-          // Color winning cells
-          cellElement.style.backgroundColor = boardState[index] === player ? "green" : "red";
+          if (boardState[index] === player) {
+            cellElement.style.backgroundColor = "green"; // Player win
+          } else if (boardState[index] === robot) {
+            cellElement.style.backgroundColor = "red"; // Robot win
+          }
         }
+
         cellElement.addEventListener("click", handlePlayerMove);
         boardElement.appendChild(cellElement);
       });
@@ -282,7 +288,7 @@
 
     // Check if the board is full (draw)
     function isBoardFull() {
-      if (boardState.every(cell => cell !== "")) {
+      if (!boardState.includes("")) {
         gameOver = true;
         scores.draws++;
         resultElement.textContent = "It's a Draw!";
