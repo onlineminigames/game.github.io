@@ -1,77 +1,67 @@
-// Game variables
-const boardState = Array(9).fill(""); // Empty board
+const boardElement = document.getElementById("board");
+const resultElement = document.getElementById("result");
+const resetButton = document.getElementById("reset");
+let boardState = Array(9).fill(""); // Represents the board (3x3)
 const player = "X";
 const robot = "O";
-const board = document.getElementById("tic-tac-toe-board");
 
-// Initialize scores
-let scores = {
+// Load scoreboard
+let scores = JSON.parse(localStorage.getItem("tictactoe-scores")) || {
   wins: 0,
   losses: 0,
   draws: 0,
 };
 
-// Load scores from localStorage
-function loadScores() {
-  const savedScores = JSON.parse(localStorage.getItem("tictactoe-scores"));
-  if (savedScores) {
-    scores = savedScores;
-  }
-  updateScoreboard();
-}
-
-// Save scores to localStorage
-function saveScores() {
-  localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
-}
-
-// Update the scoreboard display
 function updateScoreboard() {
   document.getElementById("wins").textContent = scores.wins;
   document.getElementById("losses").textContent = scores.losses;
   document.getElementById("draws").textContent = scores.draws;
 }
 
-// Create the Tic Tac Toe board
+function saveScores() {
+  localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
+}
+
+// Initialize the board
 function createBoard() {
-  board.innerHTML = ""; // Clear the board
+  boardElement.innerHTML = ""; // Clear existing board
   boardState.forEach((cell, index) => {
     const cellElement = document.createElement("div");
-    cellElement.className = "cell"; // Class for styling
-    cellElement.dataset.index = index; // Assign unique index
-    cellElement.textContent = cell; // Add the current state (X, O, or empty)
-    cellElement.addEventListener("click", handlePlayerMove); // Add click handler
-    board.appendChild(cellElement); // Append to the board container
+    cellElement.className = "cell";
+    cellElement.dataset.index = index;
+    cellElement.textContent = cell;
+    cellElement.addEventListener("click", handlePlayerMove);
+    boardElement.appendChild(cellElement);
   });
 }
 
-// Handle player move
+// Handle player's move
 function handlePlayerMove(event) {
   const index = event.target.dataset.index;
 
-  // Ignore clicks on filled cells or if the game is over
-  if (boardState[index] !== "" || checkWinner()) return;
+  // Ignore clicks on already filled cells or if the game is over
+  if (boardState[index] !== "" || checkWinner() || isBoardFull()) return;
 
-  boardState[index] = player; // Set player move
+  boardState[index] = player; // Player's move
   createBoard();
 
-  if (checkWinner() || isBoardFull()) return; // End if there's a winner or draw
+  if (checkWinner() || isBoardFull()) return;
 
   robotMove(); // Robot's turn
 }
 
-// Robot's move
+// Robot makes a random move
 function robotMove() {
-  let emptyIndices = boardState
+  const emptyCells = boardState
     .map((cell, index) => (cell === "" ? index : null))
     .filter((index) => index !== null);
 
-  // Random move by the robot
-  const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-  boardState[randomIndex] = robot;
+  const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  boardState[randomIndex] = robot; // Robot's move
   createBoard();
 
-  if (checkWinner() || isBoardFull()) return; // End if there's a winner or draw
+  checkWinner(); // Check for winner after robot's move
+  isBoardFull(); // Check for draw
 }
 
 // Check for winner
@@ -87,53 +77,42 @@ function checkWinner() {
     [2, 4, 6],
   ];
 
-  for (let combo of winningCombos) {
+  for (const combo of winningCombos) {
     const [a, b, c] = combo;
     if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
-      updateResult(boardState[a] === player ? "win" : "loss");
+      resultElement.textContent =
+        boardState[a] === player ? "You win!" : "You lose!";
+      if (boardState[a] === player) scores.wins++;
+      else scores.losses++;
+      saveScores();
+      updateScoreboard();
       return true;
     }
   }
   return false;
 }
 
-// Check if the board is full
+// Check for draw
 function isBoardFull() {
   if (boardState.every((cell) => cell !== "")) {
-    updateResult("draw");
+    resultElement.textContent = "It's a draw!";
+    scores.draws++;
+    saveScores();
+    updateScoreboard();
     return true;
   }
   return false;
 }
 
-// Update game result
-function updateResult(result) {
-  const resultDisplay = document.getElementById("result");
-
-  if (result === "win") {
-    scores.wins++;
-    resultDisplay.textContent = "You win!";
-  } else if (result === "loss") {
-    scores.losses++;
-    resultDisplay.textContent = "You lose!";
-  } else if (result === "draw") {
-    scores.draws++;
-    resultDisplay.textContent = "It's a draw!";
-  }
-
-  saveScores();
-  updateScoreboard();
-}
-
-// Reset game
-document.getElementById("reset-btn").addEventListener("click", () => {
-  boardState.fill(""); // Clear board state
-  document.getElementById("result").textContent = ""; // Clear result display
-  createBoard(); // Recreate board
+// Reset the game
+resetButton.addEventListener("click", () => {
+  boardState = Array(9).fill("");
+  resultElement.textContent = "";
+  createBoard();
 });
 
-// Initialize game
+// Initialize the game
 document.addEventListener("DOMContentLoaded", () => {
-  loadScores();
+  updateScoreboard();
   createBoard();
 });
