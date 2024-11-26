@@ -135,7 +135,7 @@ function checkWinner() {
     const [a, b, c] = combo;
     if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
       gameOver = true;
-      winningCombo = combo; // Store the winning combo to highlight the cells
+      winningCombo = combo;
       if (boardState[a] === player) {
         scores.wins++;
         resultElement.textContent = "You Win!";
@@ -176,4 +176,3 @@ resetButton.addEventListener("click", () => {
 // Initialize the game
 createBoard();
 updateScoreboard();
-
