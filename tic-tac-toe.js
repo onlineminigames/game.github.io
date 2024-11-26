@@ -1,7 +1,7 @@
 let board = ["", "", "", "", "", "", "", "", ""];
 let currentPlayer = "X";
 let gameOver = false;
-let playerScores = { X: 0, O: 0 }; // Save scores for both players
+let playerScores = { X: { wins: 0, losses: 0, draws: 0 }, O: { wins: 0, losses: 0, draws: 0 } };
 
 // Add event listeners to each cell
 const cells = document.querySelectorAll('.cell');
@@ -20,11 +20,14 @@ function handleCellClick(index) {
   // Check for a win or a draw
   if (checkWin(currentPlayer)) {
     gameOver = true;
-    playerScores[currentPlayer]++;
+    playerScores[currentPlayer].wins++;
+    playerScores[currentPlayer === "X" ? "O" : "X"].losses++;
     displayResult(`${currentPlayer} wins!`);
     drawWinningLine(getWinningCombination(currentPlayer));
   } else if (board.every(cell => cell !== "")) {
     gameOver = true;
+    playerScores.X.draws++;
+    playerScores.O.draws++;
     displayResult("It's a draw!");
   } else {
     // Switch to the next player
@@ -72,48 +75,43 @@ function drawWinningLine(winningCombo) {
   const line = document.createElement('div');
   line.classList.add('winning-line');
 
-  const isHorizontal = winningCombo[0] % 3 === winningCombo[1] % 3;
-  const isVertical = winningCombo[0] / 3 === winningCombo[1] / 3;
-  
-  if (isHorizontal) {
-    const row = Math.floor(winningCombo[0] / 3);
-    line.style.top = `${row * 90}px`;
-    line.style.left = '0';
-    line.style.width = '270px'; // Full width of the grid
-    line.style.height = '3px';
-  } else if (isVertical) {
-    const col = winningCombo[0] % 3;
-    line.style.left = `${col * 90}px`;
-    line.style.top = '0';
-    line.style.height = '270px'; // Full height of the grid
-    line.style.width = '3px';
-  } else {
-    line.style.left = '0';
-    line.style.top = '0';
-    line.style.width = '270px';
-    line.style.height = '3px';
-    line.style.transform = 'rotate(45deg)';
-    line.style.transformOrigin = 'top left';
-  }
+  // Calculate coordinates for the winning line
+  const [start, middle, end] = winningCombo;
 
+  const startX = (start % 3) * 90 + 45;  // Start x position (middle of cell)
+  const startY = Math.floor(start / 3) * 90 + 45;  // Start y position (middle of cell)
+  const endX = (end % 3) * 90 + 45;  // End x position (middle of cell)
+  const endY = Math.floor(end / 3) * 90 + 45;  // End y position (middle of cell)
+
+  const angle = Math.atan2(endY - startY, endX - startX);
+  const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+
+  // Style the line
+  line.style.top = `${startY - 1}px`;
+  line.style.left = `${startX - 1}px`;
+  line.style.width = `${distance}px`;
+  line.style.height = '2px';
+  line.style.transformOrigin = '0 50%';
+  line.style.transform = `rotate(${angle}rad)`;
+  
   boardContainer.appendChild(line);
 }
 
-// Display the result message
+// Display the game result
 function displayResult(message) {
-  const resultDiv = document.getElementById('result');
-  resultDiv.innerText = message;
-
-  // Update player scores
-  const scoreX = document.getElementById('score-X');
-  const scoreO = document.getElementById('score-O');
-  scoreX.innerText = `X: ${playerScores.X}`;
-  scoreO.innerText = `O: ${playerScores.O}`;
+  document.getElementById('result').innerText = message;
+  updateScoreboard();
 }
 
-// Function to make the robot's move
+// Update the scoreboard
+function updateScoreboard() {
+  document.getElementById('score-X').innerText = `X Wins: ${playerScores.X.wins} | X Losses: ${playerScores.X.losses} | X Draws: ${playerScores.X.draws}`;
+  document.getElementById('score-O').innerText = `O Wins: ${playerScores.O.wins} | O Losses: ${playerScores.O.losses} | O Draws: ${playerScores.O.draws}`;
+}
+
+// Robot's move (O)
 function robotMove() {
-  const emptyCells = board.map((value, index) => value === "" ? index : -1).filter(index => index !== -1);
+  const emptyCells = board.map((cell, index) => cell === "" ? index : -1).filter(index => index !== -1);
   const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
 
   setTimeout(() => handleCellClick(randomCell), 500); // Delay to simulate robot thinking
