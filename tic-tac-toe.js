@@ -128,5 +128,4 @@ function resetGame() {
   document.getElementById('result').innerText = "";
 }
 
-// Add event listener for reset button
 document.getElementById('reset').addEventListener('click', resetGame);
