@@ -141,7 +141,7 @@ function checkWinner() {
         resultElement.textContent = "You Win!";
       } else {
         scores.losses++;
-        resultElement.textContent = "Robot Wins!";
+        resultElement.textContent = "You Lose!";
       }
       saveScores();
       updateScoreboard();
