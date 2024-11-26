@@ -1,6 +1,6 @@
 /* General body styling */
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   text-align: center;
   background: linear-gradient(135deg, #2b5876, #4e4376);
   color: white;
@@ -8,23 +8,24 @@ body {
   padding: 0;
 }
 
-/* Title styling */
 h1 {
   margin-top: 20px;
   font-size: 2.5em;
-  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Tic Tac Toe board styling */
-#tic-tac-toe-board {
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+#board {
   display: grid;
-  grid-template-columns: repeat(3, 100px); /* 3x3 grid structure */
-  grid-gap: 5px;
-  margin: 20px auto;
-  background-color: #fff;
-  border: 3px solid #000;
-  padding: 5px;
-  width: max-content; /* Ensures the grid fits tightly */
+  grid-template-columns: repeat(3, 100px); /* 3x3 Grid */
+  grid-template-rows: repeat(3, 100px);
+  gap: 5px;
+  margin: 20px;
 }
 
 .cell {
@@ -36,14 +37,32 @@ h1 {
   text-align: center;
   line-height: 100px; /* Centers text vertically */
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .cell:hover {
   background-color: #ddd;
 }
 
-/* Back button styling */
+#result {
+  margin-top: 10px;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+#reset {
+  background-color: #ff5722;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#reset:hover {
+  background-color: #e64a19;
+}
+
 .back-button {
   position: absolute;
   top: 10px;
@@ -54,21 +73,12 @@ h1 {
   font-size: 1.2em;
   padding: 10px 15px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, background 0.2s;
 }
 
-.back-button:hover {
-  background: #e64a19;
-  transform: translateY(-3px);
-}
-
-/* Scoreboard styling */
 #scoreboard {
   margin-top: 20px;
 }
 
-#result {
-  margin-top: 15px;
-  font-size: 1.5em;
+#scoreboard p {
+  font-size: 1.2em;
 }
