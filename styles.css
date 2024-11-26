@@ -6,11 +6,19 @@ body {
   color: white;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
+/* Make sure the viewport scales well on mobile */
+meta[name="viewport"] {
+  content: width=device-width, initial-scale=1.0;
+}
+
+/* Title styling */
 h1 {
   margin-top: 20px;
   font-size: 2.5em;
+  margin-bottom: 20px;
 }
 
 #game-container {
@@ -26,6 +34,9 @@ h1 {
   grid-template-rows: repeat(3, 100px);
   gap: 5px;
   margin: 20px;
+  max-width: 350px; /* Limit size for mobile */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .cell {
@@ -57,6 +68,7 @@ h1 {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-top: 20px;
 }
 
 #reset:hover {
@@ -81,4 +93,30 @@ h1 {
 
 #scoreboard p {
   font-size: 1.2em;
+}
+
+@media screen and (max-width: 600px) {
+  h1 {
+    font-size: 2em;
+  }
+  
+  .cell {
+    width: 80px;
+    height: 80px;
+    font-size: 1.5em;
+  }
+
+  #board {
+    grid-template-columns: repeat(3, 80px);
+    grid-template-rows: repeat(3, 80px);
+  }
+
+  #reset {
+    padding: 8px 16px;
+    font-size: 0.9em;
+  }
+
+  #scoreboard p {
+    font-size: 1em;
+  }
 }
