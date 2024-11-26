@@ -23,6 +23,11 @@ h1 {
   margin-top: 20px;
 }
 
+.scoreboard {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
 #board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
