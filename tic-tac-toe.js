@@ -176,3 +176,4 @@ resetButton.addEventListener("click", () => {
 // Initialize the game
 createBoard();
 updateScoreboard();
+
