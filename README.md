@@ -1,1 +1,1 @@
-# game.github.io
+# onlineminigames.github.io
