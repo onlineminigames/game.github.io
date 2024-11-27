@@ -84,6 +84,8 @@
         #game-board {
             border: 2px solid #333;
             background-color: #f9f9f9;
+            background-image: linear-gradient(45deg, #d9d9d9 25%, transparent 25%), linear-gradient(-45deg, #d9d9d9 25%, transparent 25%);
+            background-size: 20px 20px;
         }
 
         #back-to-menu {
@@ -172,12 +174,27 @@
         }
 
         function drawSnake() {
-            snake.forEach((segment) => {
+            // Draw the snake with rounded ends
+            snake.forEach((segment, index) => {
                 const x = segment.x * GRID_SIZE;
                 const y = segment.y * GRID_SIZE;
+                const isHead = index === 0;
+                const isTail = index === snake.length - 1;
 
                 ctx.fillStyle = SNAKE_COLOR;
-                ctx.fillRect(x, y, GRID_SIZE, GRID_SIZE);
+
+                // Rounded corners for head and tail
+                if (isHead) {
+                    ctx.beginPath();
+                    ctx.arc(x + GRID_SIZE / 2, y + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (isTail) {
+                    ctx.beginPath();
+                    ctx.arc(x + GRID_SIZE / 2, y + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(x, y, GRID_SIZE, GRID_SIZE);
+                }
             });
         }
 
@@ -186,7 +203,9 @@
             const y = food.y * GRID_SIZE;
 
             ctx.fillStyle = FOOD_COLOR;
-            ctx.fillRect(x, y, GRID_SIZE, GRID_SIZE);
+            ctx.beginPath();
+            ctx.arc(x + GRID_SIZE / 2, y + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         function moveSnake() {
@@ -225,8 +244,6 @@
 
         function gameOver() {
             clearInterval(gameLoop);
-            alert(`Game Over! Your score: ${score}`);
-            lastScoreElement.textContent = score;
             showScreen(menuScreen);
         }
 
@@ -260,36 +277,28 @@
         let touchStartX, touchStartY;
 
         gameContainer.addEventListener('touchstart', (e) => {
-            if (gameStarted) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        });
-
-        gameContainer.addEventListener('touchmove', (e) => {
-            if (!touchStartX || !touchStartY) return;
-            const touchEndX = e.touches[0].clientX;
-            const touchEndY = e.touches[0].clientY;
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-
-            if (Math.abs(dx) > Math.abs(dy)) {
-                direction = dx > 0 ? 'right' : 'left';
-            } else {
-                direction = dy > 0 ? 'down' : 'up';
+            if (gameStarted && direction === null) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
             }
-
-            touchStartX = touchEndX;
-            touchStartY = touchEndY;
         });
 
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
+        gameContainer.addEventListener('touchend', (e) => {
             if (!gameStarted) return;
-            if (e.key === 'ArrowUp') direction = 'up';
-            if (e.key === 'ArrowDown') direction = 'down';
-            if (e.key === 'ArrowLeft') direction = 'left';
-            if (e.key === 'ArrowRight') direction = 'right';
+
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                direction = deltaX > 0 ? 'right' : 'left';
+            } else {
+                direction = deltaY > 0 ? 'down' : 'up';
+            }
         });
+
     </script>
 </body>
 </html>
