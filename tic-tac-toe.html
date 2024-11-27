@@ -40,8 +40,8 @@
       width: 90%;
       margin-top: 10px;
       position: relative;
-      height: 450px; /* Fixed height of the container */
-      transition: all 0.5s ease-in-out;
+      height: 450px; /* Fixed height */
+      transition: height 0.5s ease-in-out;
     }
 
     .scoreboard {
@@ -279,18 +279,10 @@
 
     function getBestMove() {
       const winningMoves = getWinningMove(robot);
-      if (winningMoves.length > 0) {
-        return winningMoves[0];
-      }
+      if (winningMoves.length > 0) return winningMoves[0];
 
       const blockingMoves = getWinningMove(player);
-      if (blockingMoves.length > 0) {
-        return blockingMoves[0];
-      }
-
-      if (boardState[4] === "") {
-        return 4;
-      }
+      if (blockingMoves.length > 0) return blockingMoves[0];
 
       const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
       if (corners.length > 0) {
@@ -342,20 +334,17 @@
         resultElement.textContent = "You Win!";
         scores.wins++;
         gameOver = true;
-        resetButton.classList.add("show");
-        resultElement.classList.add("show");
+        showEndGameElements();
       } else if (winner === robot) {
         resultElement.textContent = "You Lose!";
         scores.losses++;
         gameOver = true;
-        resetButton.classList.add("show");
-        resultElement.classList.add("show");
+        showEndGameElements();
       } else if (isBoardFull()) {
         resultElement.textContent = "It's a Draw!";
         scores.draws++;
         gameOver = true;
-        resetButton.classList.add("show");
-        resultElement.classList.add("show");
+        showEndGameElements();
       }
 
       saveScores();
@@ -367,6 +356,11 @@
       return boardState.every(cell => cell !== "");
     }
 
+    function showEndGameElements() {
+      resetButton.classList.add("show");
+      resultElement.classList.add("show");
+    }
+
     resetButton.addEventListener("click", () => {
       resultElement.classList.remove("show");
       resetButton.classList.remove("show");
@@ -374,7 +368,6 @@
       boardState = Array(9).fill("");
       createBoard();
       gameOver = false;
-      setTimeout(() => resetButton.style.display = "none", 500);
     });
 
     createBoard();
