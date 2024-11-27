@@ -12,7 +12,6 @@
       color: white;
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
     }
 
     h1 {
@@ -97,6 +96,19 @@
       border-radius: 5px;
     }
 
+    .win-line {
+      position: absolute;
+      background: red;
+      height: 5px;
+      width: 100%;
+      z-index: 10;
+    }
+
+    .vertical-line {
+      width: 5px;
+      height: 100%;
+    }
+
     @media (max-width: 600px) {
       #board {
         grid-template-columns: repeat(3, 1fr);
@@ -165,19 +177,13 @@
         cellElement.className = "cell";
         cellElement.dataset.index = index;
         cellElement.textContent = cell;
-
-        // Color winning cells
-        if (winningCombo.includes(index)) {
-          if (boardState[index] === player) {
-            cellElement.style.backgroundColor = "green"; // Player win
-          } else if (boardState[index] === robot) {
-            cellElement.style.backgroundColor = "red"; // Robot win
-          }
-        }
-
         cellElement.addEventListener("click", handlePlayerMove);
         boardElement.appendChild(cellElement);
       });
+
+      if (winningCombo.length > 0) {
+        drawWinningLine(winningCombo);
+      }
     }
 
     // Handle player's move
@@ -209,6 +215,27 @@
       isBoardFull(); // Check for draw
     }
 
+    // Draw the winning line
+    function drawWinningLine(combo) {
+      const [a, b, c] = combo;
+
+      const start = boardElement.children[a].getBoundingClientRect();
+      const end = boardElement.children[c].getBoundingClientRect();
+      const board = boardElement.getBoundingClientRect();
+
+      const line = document.createElement("div");
+      line.classList.add("win-line");
+
+      line.style.left = `${(start.left + end.left) / 2 - board.left}px`;
+      line.style.top = `${(start.top + end.top) / 2 - board.top}px`;
+      line.style.transform = `rotate(${Math.atan2(
+        end.top - start.top,
+        end.left - start.left
+      )}rad)`;
+
+      boardElement.appendChild(line);
+    }
+    
     // Function to get the best move for the robot
     function getBestMove() {
       const winningMoves = getWinningMove(robot); 
