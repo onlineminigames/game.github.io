@@ -5,21 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tic Tac Toe</title>
   <style>
-   body {
-    font-family: 'Roboto', Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(135deg, #3a6e9f, #5a8fce);  /* Slightly darker blue gradient */
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;  /* Align content to the top */
-    min-height: 100vh;
-    padding-top: 20px; /* Add some padding to the top */
-  }
-
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #3a6e9f, #5a8fce);  /* Slightly darker blue gradient */
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;  /* Align content to the top */
+      min-height: 100vh;
+      padding-top: 20px; /* Add some padding to the top */
+    }
 
     h1 {
       font-size: 3em;
@@ -57,8 +56,6 @@
     .scoreboard p {
       margin: 0;
     }
-
-
 
     .score-item {
       text-align: center;
@@ -111,7 +108,6 @@
       color: #fff;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-
 
     #result {
       margin-top: 15px;
@@ -200,7 +196,6 @@
   <a href="index" class="back-button">Back to Menu</a>
 
   <script>
-    // JavaScript code remains unchanged from the previous example.
     const boardElement = document.getElementById("board");
     const resultElement = document.getElementById("result");
     const resetButton = document.getElementById("reset");
@@ -255,91 +250,59 @@
 
     function robotMove() {
       if (gameOver) return;
-    
+
       const bestMove = getBestMove();
       boardState[bestMove] = robot;
       createBoard();
-    
+
       checkWinner();
       isBoardFull();
     }
-
 
     function getBestMove() {
       const emptyCells = getEmptyCells(boardState);
       let bestMove = -1;
       let bestScore = -Infinity;
-    
+
       for (let i = 0; i < emptyCells.length; i++) {
         const index = emptyCells[i];
         boardState[index] = robot; // Make the move
         const score = minimax(boardState, 0, false);
         boardState[index] = ""; // Undo the move
-    
+
         if (score > bestScore) {
           bestScore = score;
           bestMove = index;
         }
       }
-    
+
       return bestMove;
     }
 
-
-        // The Minimax algorithm evaluates the best move
     function minimax(board, depth, isMaximizing) {
       const winner = checkWinnerForMinimax(board);
       if (winner === robot) return 10 - depth; // Robot wins
       if (winner === player) return depth - 10; // Player wins
       if (isBoardFull(board)) return 0; // Draw
-    
+
       const emptyCells = getEmptyCells(board);
       let bestScore = isMaximizing ? -Infinity : Infinity;
-    
+
       for (let i = 0; i < emptyCells.length; i++) {
         const index = emptyCells[i];
         board[index] = isMaximizing ? robot : player;
-    
+
         const score = minimax(board, depth + 1, !isMaximizing);
         board[index] = ""; // Undo the move
-    
+
         bestScore = isMaximizing
           ? Math.max(score, bestScore)
           : Math.min(score, bestScore);
       }
-    
+
       return bestScore;
     }
 
-
-    function getWinningMove(symbol) {
-      const winningMoves = [];
-      const winningCombos = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
-      ];
-
-      winningCombos.forEach((combo) => {
-        const [a, b, c] = combo;
-        if (
-          boardState[a] === symbol &&
-          boardState[b] === symbol &&
-          boardState[c] === ""
-        ) {
-          winningMoves.push(c);
-        }
-      });
-
-      return winningMoves;
-    }
-
-    // Function to check if there's a winner (for Minimax)
     function checkWinnerForMinimax(board) {
       const winningCombos = [
         [0, 1, 2],
@@ -351,7 +314,7 @@
         [0, 4, 8],
         [2, 4, 6],
       ];
-    
+
       for (const combo of winningCombos) {
         const [a, b, c] = combo;
         if (board[a] && board[a] === board[b] && board[a] === board[c]) {
@@ -361,24 +324,33 @@
       return null; // No winner yet
     }
 
-    // Function to get all empty cells
-    function getEmptyCells(board) {
-      return board
-        .map((cell, index) => (cell === "" ? index : null))
-        .filter(index => index !== null);
-    }
+    function checkWinner() {
+      const winner = checkWinnerForMinimax(boardState);
 
-
-    function isBoardFull() {
-      if (!boardState.includes("")) {
+      if (winner) {
         gameOver = true;
-        scores.draws++;
-        resultElement.textContent = "It's a Draw!";
+        resultElement.textContent = winner === player ? "You Win!" : "You Lose!";
+        if (winner === player) {
+          scores.wins++;
+        } else {
+          scores.losses++;
+        }
         saveScores();
         updateScoreboard();
         return true;
       }
+
       return false;
+    }
+
+    function isBoardFull(board) {
+      return board.every(cell => cell !== "");
+    }
+
+    function getEmptyCells(board) {
+      return board
+        .map((cell, index) => (cell === "" ? index : null))
+        .filter(index => index !== null);
     }
 
     resetButton.addEventListener("click", () => {
