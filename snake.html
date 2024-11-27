@@ -9,9 +9,7 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            background: #4CAF50;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,28 +17,14 @@
             overflow: hidden;
         }
 
-        @keyframes gradient {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
         #game-container {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: #c8e6c9;
+            border: 3px solid #388e3c;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             position: relative;
-            width: 100%;
-            max-width: 500px;
-            height: 90vh;
-            max-height: 600px;
+            width: 400px;
+            height: 600px;
         }
 
         .screen {
@@ -81,7 +65,6 @@
             margin: 4px 2px;
             cursor: pointer;
             border-radius: 5px;
-            transition: background-color 0.3s ease;
         }
 
         button:hover {
@@ -90,15 +73,12 @@
 
         #score-container {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            justify-content: space-between;
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
             font-size: 1.2rem;
             color: #333;
-            margin-bottom: 15px;
         }
 
         #game-board {
@@ -124,27 +104,33 @@
             background-color: #45a049;
         }
 
-        .menu-score {
-            font-size: 1.2rem;
-            margin-top: 10px;
+        /* Snake & Food Styling */
+        .snake {
+            background-color: #2979ff;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
         }
+
+        .food {
+            background-color: #e53935;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
     </style>
 </head>
 <body>
-    <a href="index.html" id="back-to-menu">Back to Menu</a>
     <div id="game-container">
         <div id="menu" class="screen active">
             <h1>Snake Game</h1>
-            <div id="score-container">
-                <p>Last Score: <span id="last-score">0</span></p>
-                <p>High Score: <span id="high-score">0</span></p>
-            </div>
             <button id="start-game">Start Game</button>
         </div>
         <div id="game" class="screen">
             <div id="score-container">
                 <div>Score: <span id="current-score">0</span></div>
-                <div>High Score: <span id="game-high-score">0</span></div>
+                <div>High Score: <span id="high-score">0</span></div>
             </div>
             <canvas id="game-board"></canvas>
         </div>
@@ -154,35 +140,29 @@
         const menuScreen = document.getElementById('menu');
         const gameScreen = document.getElementById('game');
         const startGameBtn = document.getElementById('start-game');
-        const lastScoreElement = document.getElementById('last-score');
-        const highScoreElement = document.getElementById('high-score');
         const currentScoreElement = document.getElementById('current-score');
-        const gameHighScoreElement = document.getElementById('game-high-score');
+        const highScoreElement = document.getElementById('high-score');
         const canvas = document.getElementById('game-board');
         const ctx = canvas.getContext('2d');
 
-        // Revert grid size to match a vertically longer game area
         const GRID_SIZE = 20;
-        const SNAKE_COLOR = '#4CAF50';
-        const SNAKE_BORDER_COLOR = '#45a049';
-        const FOOD_COLOR = '#FF0000';
+        const SNAKE_COLOR = '#2979ff';
+        const FOOD_COLOR = '#e53935';
 
         let snake, food, direction, gameLoop, score, highScore, gameStarted;
 
         function initGame() {
-            // Set canvas to be vertically longer
-            canvas.width = 300;
-            canvas.height = 500;
+            canvas.width = gameContainer.clientWidth - 20;
+            canvas.height = gameContainer.clientHeight - 100;
 
-            // Place snake in the center
-            snake = [{ x: Math.floor(canvas.width / (2 * GRID_SIZE)), y: Math.floor(canvas.height / (2 * GRID_SIZE)) }];
+            snake = [{ x: Math.floor(canvas.width / 2 / GRID_SIZE), y: Math.floor(canvas.height / 2 / GRID_SIZE) }];
             food = generateFood();
-            direction = null; // Snake won't move until direction is set
+            direction = null; // Start stationary
             score = 0;
             highScore = localStorage.getItem('snakeHighScore') || 0;
             currentScoreElement.textContent = score;
-            gameHighScoreElement.textContent = highScore;
-            gameStarted = false; // Game hasn't started yet
+            highScoreElement.textContent = highScore;
+            gameStarted = false;
         }
 
         function generateFood() {
@@ -192,44 +172,24 @@
         }
 
         function drawSnake() {
-            ctx.beginPath();
-            ctx.moveTo(snake[0].x * GRID_SIZE + GRID_SIZE / 2, snake[0].y * GRID_SIZE + GRID_SIZE / 2);
-            for (let i = 1; i < snake.length; i++) {
-                const x = snake[i].x * GRID_SIZE + GRID_SIZE / 2;
-                const y = snake[i].y * GRID_SIZE + GRID_SIZE / 2;
-                ctx.lineTo(x, y);
-            }
-            ctx.lineWidth = GRID_SIZE;
-            ctx.strokeStyle = SNAKE_COLOR;
-            ctx.lineCap = 'round';
-            ctx.stroke();
+            snake.forEach((segment) => {
+                const x = segment.x * GRID_SIZE;
+                const y = segment.y * GRID_SIZE;
+
+                ctx.fillStyle = SNAKE_COLOR;
+                ctx.fillRect(x, y, GRID_SIZE, GRID_SIZE);
+            });
         }
 
         function drawFood() {
-            const x = food.x * GRID_SIZE + GRID_SIZE / 2;
-            const y = food.y * GRID_SIZE + GRID_SIZE / 2;
+            const x = food.x * GRID_SIZE;
+            const y = food.y * GRID_SIZE;
 
             ctx.fillStyle = FOOD_COLOR;
-            ctx.beginPath();
-            ctx.arc(x, y, GRID_SIZE / 2, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-
-        function drawCheckeredBackground() {
-            const rows = Math.floor(canvas.height / GRID_SIZE);
-            const cols = Math.floor(canvas.width / GRID_SIZE);
-
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    ctx.fillStyle = (i + j) % 2 === 0 ? '#f0f0f0' : '#e0e0e0';
-                    ctx.fillRect(j * GRID_SIZE, i * GRID_SIZE, GRID_SIZE, GRID_SIZE);
-                }
-            }
+            ctx.fillRect(x, y, GRID_SIZE, GRID_SIZE);
         }
 
         function moveSnake() {
-            if (direction === null) return; // Don't move if no direction is set yet
-
             const head = { ...snake[0] };
 
             switch (direction) {
@@ -240,14 +200,13 @@
             }
 
             snake.unshift(head);
-
             if (head.x === food.x && head.y === food.y) {
                 food = generateFood();
                 score++;
                 currentScoreElement.textContent = score;
                 if (score > highScore) {
                     highScore = score;
-                    gameHighScoreElement.textContent = highScore;
+                    highScoreElement.textContent = highScore;
                     localStorage.setItem('snakeHighScore', highScore);
                 }
             } else {
@@ -273,7 +232,6 @@
 
         function updateGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawCheckeredBackground();
             moveSnake();
             if (checkCollision()) {
                 gameOver();
@@ -302,7 +260,7 @@
         let touchStartX, touchStartY;
 
         gameContainer.addEventListener('touchstart', (e) => {
-            if (!gameStarted) return; // Only accept input once the game has started
+            if (gameStarted) return;
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         });
@@ -326,17 +284,12 @@
 
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
-            if (!gameStarted) return; // Don't accept keyboard input before game starts
-            switch (e.key) {
-                case 'ArrowUp': direction = 'up'; break;
-                case 'ArrowDown': direction = 'down'; break;
-                case 'ArrowLeft': direction = 'left'; break;
-                case 'ArrowRight': direction = 'right'; break;
-            }
+            if (!gameStarted) return;
+            if (e.key === 'ArrowUp') direction = 'up';
+            if (e.key === 'ArrowDown') direction = 'down';
+            if (e.key === 'ArrowLeft') direction = 'left';
+            if (e.key === 'ArrowRight') direction = 'right';
         });
-
-        // Initialize the game
-        showScreen(menuScreen);
     </script>
 </body>
 </html>
