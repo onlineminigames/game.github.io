@@ -23,12 +23,12 @@
     .game-menu {
       display: grid;
       grid-template-columns: repeat(3, 1fr); /* 3 games per row */
-      gap: 15px;
+      gap: 20px;
       margin-top: 50px;
       padding: 20px;
       justify-items: center;
       width: 90%;
-      max-width: 1100px;
+      max-width: 1200px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -37,12 +37,12 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 200px; /* Fixed width */
-      height: 100px; /* Fixed height */
+      width: 250px; /* Increased width */
+      height: 120px; /* Increased height */
       background: #6c8ebf; /* New color to fit the design */
       color: white;
       text-decoration: none;
-      font-size: 1.4em; /* Larger text */
+      font-size: 1.6em; /* Larger text */
       text-align: center;
       border-radius: 15px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
@@ -69,13 +69,13 @@
     @media (max-width: 600px) {
       .game-menu {
         grid-template-columns: 1fr 1fr; /* 2 games per row on smaller screens */
-        gap: 10px;
+        gap: 15px;
       }
 
       .game-link {
-        width: 180px; /* Slightly smaller width on mobile */
-        height: 90px; /* Slightly smaller height on mobile */
-        font-size: 1.3em;
+        width: 230px; /* Larger width on mobile */
+        height: 110px; /* Larger height on mobile */
+        font-size: 1.4em; /* Larger font size on mobile */
       }
     }
   </style>
