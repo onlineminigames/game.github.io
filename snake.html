@@ -167,7 +167,7 @@
         const SNAKE_BORDER_COLOR = '#45a049';
         const FOOD_COLOR = '#FF0000';
 
-        let snake, food, direction, gameLoop, score, highScore;
+        let snake, food, direction, gameLoop, score, highScore, gameStarted;
 
         function initGame() {
             // Set canvas to be vertically longer
@@ -177,11 +177,12 @@
             // Place snake in the center
             snake = [{ x: Math.floor(canvas.width / (2 * GRID_SIZE)), y: Math.floor(canvas.height / (2 * GRID_SIZE)) }];
             food = generateFood();
-            direction = 'right';
+            direction = null; // Snake won't move until direction is set
             score = 0;
             highScore = localStorage.getItem('snakeHighScore') || 0;
             currentScoreElement.textContent = score;
             gameHighScoreElement.textContent = highScore;
+            gameStarted = false; // Game hasn't started yet
         }
 
         function generateFood() {
@@ -227,6 +228,8 @@
         }
 
         function moveSnake() {
+            if (direction === null) return; // Don't move if no direction is set yet
+
             const head = { ...snake[0] };
 
             switch (direction) {
@@ -284,6 +287,7 @@
             showScreen(gameScreen);
             initGame();
             gameLoop = setInterval(updateGame, 100);
+            gameStarted = true; // Game is now running
         }
 
         function showScreen(screen) {
@@ -298,16 +302,15 @@
         let touchStartX, touchStartY;
 
         gameContainer.addEventListener('touchstart', (e) => {
+            if (!gameStarted) return; // Only accept input once the game has started
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         });
 
         gameContainer.addEventListener('touchmove', (e) => {
             if (!touchStartX || !touchStartY) return;
-
             const touchEndX = e.touches[0].clientX;
             const touchEndY = e.touches[0].clientY;
-
             const dx = touchEndX - touchStartX;
             const dy = touchEndY - touchStartY;
 
@@ -323,6 +326,7 @@
 
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
+            if (!gameStarted) return; // Don't accept keyboard input before game starts
             switch (e.key) {
                 case 'ArrowUp': direction = 'up'; break;
                 case 'ArrowDown': direction = 'down'; break;
