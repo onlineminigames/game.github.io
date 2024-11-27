@@ -267,25 +267,36 @@
     function getBestMove() {
       const winningMoves = getWinningMove(robot); 
       if (winningMoves.length > 0) {
-        return winningMoves[0]; 
+        return winningMoves[0]; // Make a winning move if possible
       }
-
+    
       const blockingMoves = getWinningMove(player);
       if (blockingMoves.length > 0) {
-        return blockingMoves[0]; 
+        return blockingMoves[0]; // Block player's winning move if possible
       }
-
-      if (boardState[4] === "") return 4;
-
+    
+      // Strategic move: Take center if available
+      if (boardState[4] === "") {
+        return 4;
+      }
+    
+      // Strategic move: Take a corner if available
       const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
       if (corners.length > 0) {
         return corners[Math.floor(Math.random() * corners.length)];
       }
-
+    
+      // Otherwise, take an edge if available
+      const edges = [1, 3, 5, 7].filter(index => boardState[index] === "");
+      if (edges.length > 0) {
+        return edges[Math.floor(Math.random() * edges.length)];
+      }
+    
+      // If no strategic moves, choose any empty cell
       const emptyCells = boardState
         .map((cell, index) => (cell === "" ? index : null))
         .filter((index) => index !== null);
-
+    
       return emptyCells[Math.floor(Math.random() * emptyCells.length)];
     }
 
