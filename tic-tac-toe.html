@@ -40,8 +40,7 @@
       width: 90%;
       margin-top: 10px;
       position: relative;
-      height: 450px; /* Fixed height */
-      transition: height 0.5s ease-in-out;
+      height: 500px; /* Increased height */
     }
 
     .scoreboard {
@@ -117,10 +116,9 @@
       font-size: 1.5em;
       font-weight: bold;
       color: #333;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(20px);
-      transition: opacity 0.5s ease-in-out, visibility 0s 0.5s, transform 0.5s ease-in-out;
+      opacity: 1; /* Instantly visible */
+      visibility: visible;
+      transform: translateY(0);
     }
 
     #reset {
@@ -140,12 +138,6 @@
     }
 
     #reset.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    #result.show {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
