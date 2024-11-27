@@ -90,12 +90,15 @@
 
         #score-container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
             font-size: 1.2rem;
             color: #333;
+            margin-bottom: 15px;
         }
 
         #game-board {
@@ -132,11 +135,11 @@
     <div id="game-container">
         <div id="menu" class="screen active">
             <h1>Snake Game</h1>
-            <button id="start-game">Start Game</button>
-            <div class="menu-score">
+            <div id="score-container">
                 <p>Last Score: <span id="last-score">0</span></p>
                 <p>High Score: <span id="high-score">0</span></p>
             </div>
+            <button id="start-game">Start Game</button>
         </div>
         <div id="game" class="screen">
             <div id="score-container">
@@ -158,7 +161,7 @@
         const canvas = document.getElementById('game-board');
         const ctx = canvas.getContext('2d');
 
-        // Reverting back the original grid size (20px grid, 25x15 grid dimensions)
+        // Revert grid size to match a vertically longer game area
         const GRID_SIZE = 20;
         const SNAKE_COLOR = '#4CAF50';
         const SNAKE_BORDER_COLOR = '#45a049';
@@ -167,11 +170,12 @@
         let snake, food, direction, gameLoop, score, highScore;
 
         function initGame() {
-            // Adjust canvas size based on grid size
-            canvas.width = 500;
-            canvas.height = 300;
+            // Set canvas to be vertically longer
+            canvas.width = 300;
+            canvas.height = 500;
 
-            snake = [{ x: 5, y: 5 }];
+            // Place snake in the center
+            snake = [{ x: Math.floor(canvas.width / (2 * GRID_SIZE)), y: Math.floor(canvas.height / (2 * GRID_SIZE)) }];
             food = generateFood();
             direction = 'right';
             score = 0;
