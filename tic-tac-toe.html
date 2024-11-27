@@ -6,114 +6,161 @@
   <title>Tic Tac Toe</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Roboto', Arial, sans-serif;
       text-align: center;
-      background: linear-gradient(135deg, #2b5876, #4e4376);
-      color: white;
       margin: 0;
       padding: 0;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
 
     h1 {
-      margin-top: 20px;
-      font-size: 2.5em;
+      font-size: 3em;
+      font-weight: 700;
+      color: #fff;
       margin-bottom: 20px;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
 
     #game-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 20px;
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+      max-width: 400px;
+      width: 90%;
     }
 
     .scoreboard {
-      font-size: 1.2em;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 10px;
       margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .score-item {
+      text-align: center;
+      flex: 1;
+    }
+
+    .score-item span {
+      font-size: 1.5em;
+      font-weight: bold;
+      display: block;
+      margin-top: 5px;
+      color: #333;
     }
 
     #board {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-gap: 5px;
-      justify-content: center;
-      margin-top: 20px;
-      width: 270px;
-      max-width: 100%;
-      margin-left: auto;
-      margin-right: auto;
+      gap: 10px;
+      width: 100%;
+      max-width: 300px;
     }
 
     .cell {
-      width: 90px;
-      height: 90px;
       background: #f4f4f4;
-      border: 1px solid #000;
-      font-size: 3em;
-      text-align: center;
-      line-height: 90px;
-      cursor: pointer;
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      font-size: 2.5em;
       font-weight: bold;
-      color: black;
-      position: relative;
-      transition: background-color 0.3s;
+      color: #333;
+      text-align: center;
+      line-height: 80px;
+      height: 80px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
     }
 
     .cell:hover {
-      background-color: #ddd;
+      background: #e0e0e0;
+      transform: scale(1.05);
     }
 
     .cell.win {
-      background-color: green;
-      color: white;
+      background: linear-gradient(135deg, #00c853, #b9f6ca);
+      color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
     .cell.lose {
-      background-color: red;
-      color: white;
+      background: linear-gradient(135deg, #d50000, #ff8a80);
+      color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
     #result {
-      margin-top: 10px;
+      margin-top: 15px;
       font-size: 1.5em;
       font-weight: bold;
+      color: #333;
     }
 
     #reset {
-      background-color: #ff5722;
+      background: #ff4081;
       color: white;
       padding: 10px 20px;
       font-size: 1em;
       border: none;
-      border-radius: 5px;
+      border-radius: 30px;
       cursor: pointer;
       margin-top: 20px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s;
     }
 
     #reset:hover {
-      background-color: #e64a19;
+      background: #e91e63;
     }
 
     .back-button {
       position: absolute;
       top: 10px;
       left: 10px;
-      background: #ff5722;
+      background: #42a5f5;
       color: white;
       text-decoration: none;
       padding: 10px;
-      border-radius: 5px;
+      border-radius: 30px;
+      font-size: 0.9em;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-button:hover {
+      background: #1e88e5;
     }
 
     @media (max-width: 600px) {
       #board {
-        grid-template-columns: repeat(3, 1fr);
-        width: 250px;
+        gap: 5px;
       }
 
       .cell {
-        font-size: 2.5em;
-        line-height: 80px;
+        font-size: 2em;
+        height: 70px;
+        line-height: 70px;
+      }
+
+      .scoreboard {
+        flex-direction: column;
+        padding: 5px;
+      }
+
+      .score-item {
+        margin-bottom: 5px;
       }
     }
   </style>
@@ -123,9 +170,15 @@
 
   <div id="game-container">
     <div class="scoreboard">
-      <p>Wins: <span id="wins">0</span></p>
-      <p>Losses: <span id="losses">0</span></p>
-      <p>Draws: <span id="draws">0</span></p>
+      <div class="score-item">
+        Wins <span id="wins">0</span>
+      </div>
+      <div class="score-item">
+        Draws <span id="draws">0</span>
+      </div>
+      <div class="score-item">
+        Losses <span id="losses">0</span>
+      </div>
     </div>
 
     <div id="board"></div>
@@ -136,6 +189,7 @@
   <a href="index" class="back-button">Back to Menu</a>
 
   <script>
+    // JavaScript code remains unchanged from the previous example.
     const boardElement = document.getElementById("board");
     const resultElement = document.getElementById("result");
     const resetButton = document.getElementById("reset");
@@ -143,7 +197,6 @@
     const player = "X";
     const robot = "O";
 
-    // Load scoreboard
     let scores = JSON.parse(localStorage.getItem("tictactoe-scores")) || {
       wins: 0,
       losses: 0,
@@ -152,7 +205,6 @@
 
     let gameOver = false;
 
-    // Update scoreboard
     function updateScoreboard() {
       document.getElementById("wins").textContent = scores.wins;
       document.getElementById("losses").textContent = scores.losses;
@@ -163,9 +215,8 @@
       localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
     }
 
-    // Initialize the board
     function createBoard() {
-      boardElement.innerHTML = ""; // Clear existing board
+      boardElement.innerHTML = ""; 
       boardState.forEach((cell, index) => {
         const cellElement = document.createElement("div");
         cellElement.className = "cell";
@@ -176,7 +227,6 @@
       });
     }
 
-    // Handle player's move
     function handlePlayerMove(event) {
       if (gameOver) return;
 
@@ -192,7 +242,6 @@
       robotMove();
     }
 
-    // Robot makes a smart move
     function robotMove() {
       if (gameOver) return;
 
@@ -204,28 +253,24 @@
       isBoardFull();
     }
 
-    // Function to get the best move for the robot
     function getBestMove() {
       const winningMoves = getWinningMove(robot); 
       if (winningMoves.length > 0) {
-        return winningMoves[0]; // Robot takes the winning spot
+        return winningMoves[0]; 
       }
 
       const blockingMoves = getWinningMove(player);
       if (blockingMoves.length > 0) {
-        return blockingMoves[0]; // Block the player's winning move
+        return blockingMoves[0]; 
       }
 
-      // If no immediate win or block, pick the center if available
       if (boardState[4] === "") return 4;
 
-      // Pick a random corner if available
       const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
       if (corners.length > 0) {
         return corners[Math.floor(Math.random() * corners.length)];
       }
 
-      // Pick a random empty cell
       const emptyCells = boardState
         .map((cell, index) => (cell === "" ? index : null))
         .filter((index) => index !== null);
@@ -233,7 +278,6 @@
       return emptyCells[Math.floor(Math.random() * emptyCells.length)];
     }
 
-    // Function to check for a winning move (for either player or robot)
     function getWinningMove(symbol) {
       const winningMoves = [];
       const winningCombos = [
@@ -247,18 +291,20 @@
         [2, 4, 6],
       ];
 
-      winningCombos.forEach(combo => {
-        const cells = combo.map(index => boardState[index]);
-        const emptyCells = combo.filter((index) => boardState[index] === "");
-        if (emptyCells.length === 1 && cells.filter(cell => cell === symbol).length === 2) {
-          winningMoves.push(emptyCells[0]);
+      winningCombos.forEach((combo) => {
+        const [a, b, c] = combo;
+        if (
+          boardState[a] === symbol &&
+          boardState[b] === symbol &&
+          boardState[c] === ""
+        ) {
+          winningMoves.push(c);
         }
       });
 
       return winningMoves;
     }
 
-    // Check for a winner
     function checkWinner() {
       const winningCombos = [
         [0, 1, 2],
@@ -273,23 +319,17 @@
 
       for (const combo of winningCombos) {
         const [a, b, c] = combo;
-        if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+        if (
+          boardState[a] &&
+          boardState[a] === boardState[b] &&
+          boardState[a] === boardState[c]
+        ) {
           gameOver = true;
-
-          // Highlight winning cells
-          combo.forEach((index) => {
-            const cell = boardElement.children[index];
-            cell.classList.add(boardState[a] === player ? "win" : "lose");
-          });
-
-          if (boardState[a] === player) {
-            scores.wins++;
-            resultElement.textContent = "You Win!";
-          } else {
-            scores.losses++;
-            resultElement.textContent = "You Lose!";
-          }
-
+          const cells = document.querySelectorAll(".cell");
+          combo.forEach((index) => cells[index].classList.add("win"));
+          resultElement.textContent =
+            boardState[a] === player ? "You Win!" : "You Lose!";
+          boardState[a] === player ? scores.wins++ : scores.losses++;
           saveScores();
           updateScoreboard();
           return true;
@@ -298,7 +338,6 @@
       return false;
     }
 
-    // Check if the board is full
     function isBoardFull() {
       if (!boardState.includes("")) {
         gameOver = true;
@@ -311,7 +350,6 @@
       return false;
     }
 
-    // Reset the game
     resetButton.addEventListener("click", () => {
       boardState = Array(9).fill("");
       gameOver = false;
@@ -319,7 +357,6 @@
       createBoard();
     });
 
-    // Initialize the game
     createBoard();
     updateScoreboard();
   </script>
