@@ -25,69 +25,63 @@
       text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
 
-    /* Snake game grid */
+    /* Game container with padding and fixed dimensions */
+    .game-container {
+      width: 400px;
+      height: 500px;
+      background-color: #333;
+      border-radius: 15px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .game-board {
       display: grid;
       grid-template-columns: repeat(20, 20px);
       grid-template-rows: repeat(20, 20px);
       gap: 1px;
-      background: #333;
+      background: #444;
       border: 2px solid white;
       margin-top: 20px;
     }
 
-    /* Individual cell styling */
     .cell {
       width: 20px;
       height: 20px;
       background: #1d1f27;
     }
 
-    /* Snake styling */
     .snake {
       background: #6c8ebf;
     }
 
-    /* Food styling */
     .food {
       background: #e06d6d;
     }
 
-    /* Keyframe animation for button appearance */
-    @keyframes buttonAppear {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .score {
+      font-size: 1.5em;
+      margin-bottom: 20px;
     }
 
     .game-link {
-      display: flex;
-      justify-content: center;
-      align-items: center;
       width: 250px;
-      height: 120px;
+      height: 60px;
       background: #6c8ebf;
       color: white;
       text-decoration: none;
-      font-size: 1.6em;
+      font-size: 1.4em;
       text-align: center;
       border-radius: 15px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      opacity: 0; /* Start as invisible */
-      animation: buttonAppear 1s ease-out forwards;
-      font-weight: bold; /* Make text bold */
+      display: none;
+      margin-top: 10px;
     }
 
-    .game-link:nth-child(1) {
-      animation-delay: 0.5s;
-    }
-    .game-link:nth-child(2) {
-      animation-delay: 0.7s;
+    .game-link:hover {
+      background: #4e6b8d;
     }
 
     footer {
@@ -99,10 +93,11 @@
 </head>
 <body>
   <h1>Snake Game</h1>
-  <div class="game-board" id="game-board"></div>
-  <div>
+  <div class="game-container">
+    <div class="score" id="score">Score: 0</div>
+    <div class="game-board" id="game-board"></div>
+    <button id="back-btn" class="game-link">Back to Menu</button>
     <button id="start-btn" class="game-link">Start Game</button>
-    <p id="score" style="font-size: 1.5em; margin-top: 10px;">Score: 0</p>
   </div>
 
   <script>
@@ -115,6 +110,7 @@
     const board = document.getElementById('game-board');
     const scoreDisplay = document.getElementById('score');
     const startBtn = document.getElementById('start-btn');
+    const backBtn = document.getElementById('back-btn');
 
     // Initialize game board
     function createBoard() {
@@ -127,21 +123,17 @@
 
     // Draw snake and food on the board
     function draw() {
-      // Clear board
       const cells = document.querySelectorAll('.cell');
       cells.forEach(cell => cell.classList.remove('snake', 'food'));
 
-      // Draw snake
       snake.forEach(segment => {
         const index = segment.y * boardSize + segment.x;
         cells[index].classList.add('snake');
       });
 
-      // Draw food
       const foodIndex = food.y * boardSize + food.x;
       cells[foodIndex].classList.add('food');
 
-      // Update score display
       scoreDisplay.textContent = `Score: ${score}`;
     }
 
@@ -152,7 +144,8 @@
       direction = 'RIGHT';
       food = generateFood();
       gameInterval = setInterval(gameLoop, 100);
-      startBtn.style.display = 'none'; // Hide start button during the game
+      startBtn.style.display = 'none'; // Hide start button
+      backBtn.style.display = 'none';  // Hide back button during the game
       draw();
     }
 
@@ -160,24 +153,20 @@
     function gameLoop() {
       const head = { ...snake[0] };
 
-      // Move snake in the current direction
       if (direction === 'UP') head.y -= 1;
       if (direction === 'DOWN') head.y += 1;
       if (direction === 'LEFT') head.x -= 1;
       if (direction === 'RIGHT') head.x += 1;
 
-      // Check for collisions with walls or self
       if (head.x < 0 || head.x >= boardSize || head.y < 0 || head.y >= boardSize || collision(head)) {
         clearInterval(gameInterval);
         alert('Game Over');
         startBtn.style.display = 'inline-block'; // Show start button again
+        backBtn.style.display = 'inline-block'; // Show back button again
         return;
       }
 
-      // Move snake
       snake.unshift(head);
-
-      // Check if snake eats food
       if (head.x === food.x && head.y === food.y) {
         score++;
         food = generateFood();
@@ -188,21 +177,18 @@
       draw();
     }
 
-    // Generate new food at a random position
     function generateFood() {
       let newFood;
       do {
         newFood = { x: Math.floor(Math.random() * boardSize), y: Math.floor(Math.random() * boardSize) };
-      } while (collision(newFood)); // Ensure food does not spawn inside the snake
+      } while (collision(newFood));
       return newFood;
     }
 
-    // Check if the snake collides with itself
     function collision(head) {
       return snake.some(segment => segment.x === head.x && segment.y === head.y);
     }
 
-    // Handle keyboard input for direction
     function handleKeyPress(event) {
       if (event.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
       if (event.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
@@ -210,13 +196,44 @@
       if (event.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
     }
 
+    // Touch swipe controls
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    function handleTouchStart(event) {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    }
+
+    function handleTouchMove(event) {
+      if (touchStartX === 0 || touchStartY === 0) return;
+
+      const touchEndX = event.touches[0].clientX;
+      const touchEndY = event.touches[0].clientY;
+
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0 && direction !== 'LEFT') direction = 'RIGHT';
+        if (diffX < 0 && direction !== 'RIGHT') direction = 'LEFT';
+      } else {
+        if (diffY > 0 && direction !== 'UP') direction = 'DOWN';
+        if (diffY < 0 && direction !== 'DOWN') direction = 'UP';
+      }
+
+      touchStartX = 0;
+      touchStartY = 0;
+    }
+
     // Start the game when the start button is clicked
     startBtn.addEventListener('click', startGame);
+    backBtn.addEventListener('click', () => window.location.href = '/'); // Redirect to main menu
 
-    // Add event listener for key press
     document.addEventListener('keydown', handleKeyPress);
+    board.addEventListener('touchstart', handleTouchStart);
+    board.addEventListener('touchmove', handleTouchMove);
 
-    // Create the game board initially
     createBoard();
   </script>
 </body>
