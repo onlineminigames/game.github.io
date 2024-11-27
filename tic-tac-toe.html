@@ -10,14 +10,14 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #3a6e9f, #5a8fce);  /* Slightly darker blue gradient */
+      background: linear-gradient(135deg, #3a6e9f, #5a8fce);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;  /* Align content to the top */
+      justify-content: flex-start;
       min-height: 100vh;
-      padding-top: 20px; /* Add some padding to the top */
+      padding-top: 20px;
     }
 
     h1 {
@@ -39,19 +39,21 @@
       max-width: 400px;
       width: 90%;
       margin-top: 10px;
-      position: relative;  /* To position text and button relative to container */
+      position: relative;
+      height: 450px; /* Fixed height of the container */
+      transition: all 0.5s ease-in-out;
     }
 
     .scoreboard {
       font-size: 1.2em;
       margin-bottom: 20px;
       color: black;
-      background: rgba(255, 255, 255, 0.8);  /* Optional: Background to make text stand out */
+      background: rgba(255, 255, 255, 0.8);
       padding: 10px;
       border-radius: 10px;
       display: flex;
-      justify-content: space-between;  /* To place the texts next to each other */
-      width: 200px;  /* Adjust the width to fit both texts */
+      justify-content: space-between;
+      width: 200px;
     }
 
     .scoreboard p {
@@ -105,7 +107,7 @@
     }
 
     .cell.lose {
-      background: linear-gradient(135deg, #d50000, #ff8a80);  /* Red for robot's loss */
+      background: linear-gradient(135deg, #d50000, #ff8a80);
       color: #fff;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
@@ -116,8 +118,9 @@
       font-weight: bold;
       color: #333;
       opacity: 0;
+      visibility: hidden;
       transform: translateY(20px);
-      transition: all 0.5s ease-in-out;
+      transition: opacity 0.5s ease-in-out, visibility 0s 0.5s, transform 0.5s ease-in-out;
     }
 
     #reset {
@@ -130,20 +133,22 @@
       cursor: pointer;
       margin-top: 20px;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-      display: none; /* Hide initially */
-      opacity: 0; /* Set initial opacity to 0 for animation */
-      transform: translateY(30px); /* Initial off-screen position for animation */
-      transition: all 0.5s ease-in-out; /* Smooth transition for opacity and position */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(30px);
+      transition: all 0.5s ease-in-out;
     }
 
     #reset.show {
-      display: block;
       opacity: 1;
-      transform: translateY(0); /* Bring button into view */
+      visibility: visible;
+      transform: translateY(0);
     }
 
-    #reset:hover {
-      background: #e91e63;
+    #result.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
 
     .back-button {
@@ -212,7 +217,7 @@
     const boardElement = document.getElementById("board");
     const resultElement = document.getElementById("result");
     const resetButton = document.getElementById("reset");
-    let boardState = Array(9).fill(""); // Represents the board (3x3)
+    let boardState = Array(9).fill("");
     const player = "X";
     const robot = "O";
 
@@ -235,7 +240,7 @@
     }
 
     function createBoard() {
-      boardElement.innerHTML = ""; 
+      boardElement.innerHTML = "";
       boardState.forEach((cell, index) => {
         const cellElement = document.createElement("div");
         cellElement.className = "cell";
@@ -273,18 +278,18 @@
     }
 
     function getBestMove() {
-      const winningMoves = getWinningMove(robot); 
+      const winningMoves = getWinningMove(robot);
       if (winningMoves.length > 0) {
-        return winningMoves[0]; // Robot's winning move
+        return winningMoves[0];
       }
 
       const blockingMoves = getWinningMove(player);
       if (blockingMoves.length > 0) {
-        return blockingMoves[0]; // Block the player from winning
+        return blockingMoves[0];
       }
 
       if (boardState[4] === "") {
-        return 4;  // Take the center if available
+        return 4;
       }
 
       const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
@@ -338,16 +343,19 @@
         scores.wins++;
         gameOver = true;
         resetButton.classList.add("show");
+        resultElement.classList.add("show");
       } else if (winner === robot) {
         resultElement.textContent = "You Lose!";
         scores.losses++;
         gameOver = true;
         resetButton.classList.add("show");
+        resultElement.classList.add("show");
       } else if (isBoardFull()) {
         resultElement.textContent = "It's a Draw!";
         scores.draws++;
         gameOver = true;
         resetButton.classList.add("show");
+        resultElement.classList.add("show");
       }
 
       saveScores();
@@ -360,6 +368,7 @@
     }
 
     resetButton.addEventListener("click", () => {
+      resultElement.classList.remove("show");
       resetButton.classList.remove("show");
       resultElement.textContent = "";
       boardState = Array(9).fill("");
