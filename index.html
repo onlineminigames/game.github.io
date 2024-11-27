@@ -60,9 +60,10 @@
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
     }
 
-    /* Larger size for the last two buttons in the last row */
-    .game-link:last-child {
-      grid-column: span 2; /* This will make the last two buttons bigger */
+    /* Last two buttons take up the width of three buttons combined */
+    .game-link:last-child,
+    .game-link:nth-last-child(2) {
+      grid-column: span 3; /* These two buttons will span the entire width of the row */
     }
 
     footer {
@@ -83,8 +84,9 @@
         height: 90px; /* Slightly smaller height on smaller screens */
       }
 
-      .game-link:last-child {
-        grid-column: span 2; /* Keeps the last button bigger */
+      .game-link:last-child,
+      .game-link:nth-last-child(2) {
+        grid-column: span 2; /* Keep the last two buttons bigger on smaller screens */
       }
     }
   </style>
