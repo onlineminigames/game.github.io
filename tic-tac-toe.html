@@ -58,8 +58,6 @@
       margin: 0;
     }
 
-
-
     .score-item {
       text-align: center;
       flex: 1;
@@ -131,6 +129,7 @@
       margin-top: 20px;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
       transition: background 0.3s;
+      display: none; /* Hide initially */
     }
 
     #reset:hover {
@@ -194,13 +193,12 @@
 
     <div id="board"></div>
     <div id="result"></div>
-    <button id="reset">Reset Game</button>
+    <button id="reset">Play Again</button>
   </div>
 
   <a href="index" class="back-button">Back to Menu</a>
 
   <script>
-    // JavaScript code for Minimax and game logic
     const boardElement = document.getElementById("board");
     const resultElement = document.getElementById("result");
     const resetButton = document.getElementById("reset");
@@ -227,7 +225,7 @@
     }
 
     function createBoard() {
-      boardElement.innerHTML = "";
+      boardElement.innerHTML = ""; 
       boardState.forEach((cell, index) => {
         const cellElement = document.createElement("div");
         cellElement.className = "cell";
@@ -256,7 +254,7 @@
     function robotMove() {
       if (gameOver) return;
 
-      const bestMove = minimax(boardState, 0, true);
+      const bestMove = getBestMove();
       boardState[bestMove] = robot;
       createBoard();
 
@@ -264,104 +262,98 @@
       isBoardFull();
     }
 
-    // Minimax Algorithm to make the robot play optimally
-    function minimax(board, depth, isMaximizing) {
-      const winner = checkWinnerForMinimax(board);
-      if (winner === robot) return 10 - depth;
-      if (winner === player) return depth - 10;
-      if (isBoardFull(board)) return 0;
-
-      const emptyCells = getEmptyCells(board);
-      let bestScore = isMaximizing ? -Infinity : Infinity;
-
-      for (let i = 0; i < emptyCells.length; i++) {
-        const index = emptyCells[i];
-        board[index] = isMaximizing ? robot : player;
-        const score = minimax(board, depth + 1, !isMaximizing);
-        board[index] = ""; // Undo the move
-        bestScore = isMaximizing
-          ? Math.max(score, bestScore)
-          : Math.min(score, bestScore);
+    function getBestMove() {
+      const winningMoves = getWinningMove(robot); 
+      if (winningMoves.length > 0) {
+        return winningMoves[0]; // Make a winning move if possible
       }
-
-      return bestScore;
+    
+      const blockingMoves = getWinningMove(player);
+      if (blockingMoves.length > 0) {
+        return blockingMoves[0]; // Block player's winning move if possible
+      }
+    
+      // Take the center if available
+      if (boardState[4] === "") {
+        return 4;
+      }
+    
+      // Take a corner if available
+      const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
+      if (corners.length > 0) {
+        return corners[Math.floor(Math.random() * corners.length)];
+      }
+    
+      // Otherwise, take any available space
+      const availableSpaces = boardState
+        .map((value, index) => (value === "" ? index : null))
+        .filter(value => value !== null);
+      return availableSpaces[Math.floor(Math.random() * availableSpaces.length)];
     }
 
-    function checkWinnerForMinimax(board) {
-      const winningCombos = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
+    function getWinningMove(playerMark) {
+      const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6],           // Diagonals
       ];
 
-      for (const combo of winningCombos) {
-        const [a, b, c] = combo;
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-          return board[a]; // Returns "X" or "O" for the winner
-        }
-      }
-      return null; // No winner yet
+      return winningCombinations.filter(combination => {
+        const values = combination.map(index => boardState[index]);
+        return values.filter(value => value === playerMark).length === 2 &&
+               values.includes("");
+      }).map(combination => combination.find(index => boardState[index] === ""));
     }
 
     function checkWinner() {
-      const winner = checkWinnerForMinimax(boardState);
-
-      if (winner) {
-        gameOver = true;
-        const cells = document.querySelectorAll(".cell");
-        const winningCombo = getWinningCombo(boardState, winner);
-        winningCombo.forEach(index => cells[index].classList.add(winner === player ? "win" : "lose"));
-        resultElement.textContent = winner === player ? "You Win!" : "You Lose!";
-        winner === player ? scores.wins++ : scores.losses++;
-        saveScores();
-        updateScoreboard();
-        return true;
-      }
-
-      return false;
-    }
-
-    function getWinningCombo(board, symbol) {
-      const winningCombos = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
+      const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6],
       ];
 
-      for (const combo of winningCombos) {
-        const [a, b, c] = combo;
-        if (board[a] === symbol && board[b] === symbol && board[c] === symbol) {
-          return combo; // Return the winning combination
+      let winner = null;
+
+      winningCombinations.forEach(combination => {
+        const [a, b, c] = combination;
+        if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+          winner = boardState[a];
+          combination.forEach(index => document.querySelector(`.cell[data-index="${index}"]`).classList.add("win"));
         }
+      });
+
+      if (winner === player) {
+        resultElement.textContent = "You win!";
+        scores.wins++;
+        gameOver = true;
+        resetButton.style.display = "block";
+      } else if (winner === robot) {
+        resultElement.textContent = "Robot wins!";
+        scores.losses++;
+        gameOver = true;
+        resetButton.style.display = "block";
+      } else if (isBoardFull()) {
+        resultElement.textContent = "It's a draw!";
+        scores.draws++;
+        gameOver = true;
+        resetButton.style.display = "block";
       }
-      return [];
+
+      saveScores();
+      updateScoreboard();
+      return winner;
     }
 
-    function isBoardFull(board) {
-      return board.every(cell => cell !== "");
-    }
-
-    function getEmptyCells(board) {
-      return board
-        .map((cell, index) => (cell === "" ? index : null))
-        .filter(index => index !== null);
+    function isBoardFull() {
+      return boardState.every(cell => cell !== "");
     }
 
     resetButton.addEventListener("click", () => {
       boardState = Array(9).fill("");
-      gameOver = false;
-      resultElement.textContent = "";
       createBoard();
+      resultElement.textContent = "";
+      gameOver = false;
+      resetButton.style.display = "none";
     });
 
     createBoard();
