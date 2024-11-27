@@ -25,16 +25,18 @@
       text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
 
-    /* Game container with padding and fixed dimensions */
+    /* Game container with padding, fixed dimensions, and bright color */
     .game-container {
       width: 400px;
       height: 500px;
-      background-color: #333;
+      background-color: white; /* Bright background color */
       border-radius: 15px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative; /* To position the "Back to Menu" button */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
     .game-board {
@@ -66,22 +68,23 @@
       margin-bottom: 20px;
     }
 
-    .game-link {
-      width: 250px;
-      height: 60px;
-      background: #6c8ebf;
+    /* Back to Menu button */
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
       color: white;
-      text-decoration: none;
-      font-size: 1.4em;
-      text-align: center;
-      border-radius: 15px;
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      display: none;
-      margin-top: 10px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
-    .game-link:hover {
-      background: #4e6b8d;
+    .back-button:hover {
+      background-color: #45a049;
     }
 
     footer {
@@ -94,10 +97,9 @@
 <body>
   <h1>Snake Game</h1>
   <div class="game-container">
+    <button class="back-button" id="back-btn">Back to Menu</button>
     <div class="score" id="score">Score: 0</div>
     <div class="game-board" id="game-board"></div>
-    <button id="back-btn" class="game-link">Back to Menu</button>
-    <button id="start-btn" class="game-link">Start Game</button>
   </div>
 
   <script>
@@ -109,7 +111,6 @@
     let gameInterval;
     const board = document.getElementById('game-board');
     const scoreDisplay = document.getElementById('score');
-    const startBtn = document.getElementById('start-btn');
     const backBtn = document.getElementById('back-btn');
 
     // Initialize game board
@@ -144,8 +145,6 @@
       direction = 'RIGHT';
       food = generateFood();
       gameInterval = setInterval(gameLoop, 100);
-      startBtn.style.display = 'none'; // Hide start button
-      backBtn.style.display = 'none';  // Hide back button during the game
       draw();
     }
 
@@ -161,8 +160,7 @@
       if (head.x < 0 || head.x >= boardSize || head.y < 0 || head.y >= boardSize || collision(head)) {
         clearInterval(gameInterval);
         alert('Game Over');
-        startBtn.style.display = 'inline-block'; // Show start button again
-        backBtn.style.display = 'inline-block'; // Show back button again
+        startGame(); // Restart the game after game over
         return;
       }
 
@@ -226,9 +224,11 @@
       touchStartY = 0;
     }
 
-    // Start the game when the start button is clicked
-    startBtn.addEventListener('click', startGame);
+    // Back to Menu button functionality
     backBtn.addEventListener('click', () => window.location.href = '/'); // Redirect to main menu
+
+    // Initialize the game on page load
+    startGame();
 
     document.addEventListener('keydown', handleKeyPress);
     board.addEventListener('touchstart', handleTouchStart);
