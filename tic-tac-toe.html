@@ -10,14 +10,14 @@
       text-align: center;
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #3a6e9f, #5a8fce);  /* Slightly darker blue gradient */
+      background: linear-gradient(135deg, #3a6e9f, #5a8fce);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;  /* Align content to the top */
+      justify-content: flex-start;
       min-height: 100vh;
-      padding-top: 20px; /* Add some padding to the top */
+      padding-top: 20px;
     }
 
     h1 {
@@ -39,18 +39,21 @@
       max-width: 400px;
       width: 90%;
       margin-top: 10px;
+      transform: scaleY(0);  /* Start with container collapsed */
+      transform-origin: top;  /* Expand downwards */
+      transition: transform 0.5s ease-in-out;  /* Smooth expansion */
     }
 
     .scoreboard {
       font-size: 1.2em;
       margin-bottom: 20px;
       color: black;
-      background: rgba(255, 255, 255, 0.8);  /* Optional: Background to make text stand out */
+      background: rgba(255, 255, 255, 0.8);
       padding: 10px;
       border-radius: 10px;
       display: flex;
-      justify-content: space-between;  /* To place the texts next to each other */
-      width: 200px;  /* Adjust the width to fit both texts */
+      justify-content: space-between;
+      width: 200px;
     }
 
     .scoreboard p {
@@ -104,7 +107,7 @@
     }
 
     .cell.lose {
-      background: linear-gradient(135deg, #d50000, #ff8a80);  /* Red for robot's loss */
+      background: linear-gradient(135deg, #d50000, #ff8a80);
       color: #fff;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
@@ -114,6 +117,9 @@
       font-size: 1.5em;
       font-weight: bold;
       color: #333;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s, transform 0.5s;
     }
 
     #reset {
@@ -126,21 +132,14 @@
       cursor: pointer;
       margin-top: 20px;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-      transition: background 0.3s;
-      display: none; /* Hide initially */
-      opacity: 0; /* Set initial opacity to 0 for animation */
-      transform: translateY(30px); /* Initial off-screen position for animation */
-      transition: all 0.5s ease-in-out; /* Smooth transition for opacity and position */
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s, transform 0.5s;
     }
 
     #reset.show {
-      display: block;
       opacity: 1;
-      transform: translateY(0); /* Bring button into view */
-    }
-
-    #reset:hover {
-      background: #e91e63;
+      transform: translateY(0);
     }
 
     .back-button {
@@ -274,27 +273,22 @@
       if (winningMoves.length > 0) {
         return winningMoves[0]; // Make a winning move if possible
       }
-    
+
       const blockingMoves = getWinningMove(player);
       if (blockingMoves.length > 0) {
         return blockingMoves[0]; // Block the player from winning
       }
-    
-      // Otherwise, take the center if available
+
       if (boardState[4] === "") {
-        return 4;
+        return 4;  // Take the center if available
       }
-    
-      // Otherwise, take corners first
+
       const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
       if (corners.length > 0) {
         return corners[Math.floor(Math.random() * corners.length)];
       }
-    
-      // Otherwise, take any available space
-      const availableSpaces = boardState
-        .map((value, index) => (value === "" ? index : null))
-        .filter(value => value !== null);
+
+      const availableSpaces = boardState.map((value, index) => (value === "" ? index : null)).filter(value => value !== null);
       return availableSpaces[Math.floor(Math.random() * availableSpaces.length)];
     }
 
@@ -307,8 +301,7 @@
 
       return winningCombinations.filter(combination => {
         const values = combination.map(index => boardState[index]);
-        return values.filter(value => value === playerMark).length === 2 &&
-               values.includes("");
+        return values.filter(value => value === playerMark).length === 2 && values.includes("");
       }).map(combination => combination.find(index => boardState[index] === ""));
     }
 
@@ -368,7 +361,14 @@
       boardState = Array(9).fill("");
       createBoard();
       gameOver = false;
-      setTimeout(() => resetButton.style.display = "none", 500);
+
+      document.getElementById('game-container').style.transform = 'scaleY(0)';
+      setTimeout(() => {
+        document.getElementById('game-container').style.transform = 'scaleY(1)';
+        resetButton.style.display = "block";
+        resultElement.style.opacity = 0;
+        resultElement.style.transform = 'translateY(30px)';
+      }, 500);
     });
 
     createBoard();
