@@ -42,7 +42,6 @@
       max-width: 100%;
       margin-left: auto;
       margin-right: auto;
-      position: relative;
     }
 
     .cell {
@@ -62,6 +61,16 @@
 
     .cell:hover {
       background-color: #ddd;
+    }
+
+    .cell.win {
+      background-color: green;
+      color: white;
+    }
+
+    .cell.lose {
+      background-color: red;
+      color: white;
     }
 
     #result {
@@ -94,20 +103,6 @@
       text-decoration: none;
       padding: 10px;
       border-radius: 5px;
-    }
-
-    .win-line {
-      position: absolute;
-      background: red;
-      height: 5px;
-      z-index: 10;
-      transform-origin: 0 50%; /* Set the rotation pivot point */
-    }
-
-
-    .vertical-line {
-      width: 5px;
-      height: 100%;
     }
 
     @media (max-width: 600px) {
@@ -155,9 +150,7 @@
       draws: 0,
     };
 
-    // Flag to check if the game is over
     let gameOver = false;
-    let winningCombo = [];
 
     // Update scoreboard
     function updateScoreboard() {
@@ -181,87 +174,38 @@
         cellElement.addEventListener("click", handlePlayerMove);
         boardElement.appendChild(cellElement);
       });
-
-      if (winningCombo.length > 0) {
-        drawWinningLine(winningCombo);
-      }
     }
 
     // Handle player's move
     function handlePlayerMove(event) {
-      if (gameOver) return; // Prevent moves if the game is over
+      if (gameOver) return;
 
       const index = event.target.dataset.index;
 
-      // Ignore clicks on already filled cells
       if (boardState[index] !== "" || checkWinner() || isBoardFull()) return;
 
-      boardState[index] = player; // Player's move
+      boardState[index] = player;
       createBoard();
 
       if (checkWinner() || isBoardFull()) return;
 
-      robotMove(); // Robot's turn
+      robotMove();
     }
 
-    // Robot makes a smart move
+    // Robot makes a move
     function robotMove() {
-      if (gameOver) return; // Prevent robot's move if game is over
+      if (gameOver) return;
 
       const bestMove = getBestMove();
-      boardState[bestMove] = robot; // Robot's move
+      boardState[bestMove] = robot;
       createBoard();
 
-      checkWinner(); // Check for winner after robot's move
-      isBoardFull(); // Check for draw
+      checkWinner();
+      isBoardFull();
     }
 
-    // Draw the winning line
-    function drawWinningLine(combo) {
-      const [startIndex, middleIndex, endIndex] = combo;
-    
-      const startCell = boardElement.children[startIndex];
-      const endCell = boardElement.children[endIndex];
-    
-      const start = startCell.getBoundingClientRect();
-      const end = endCell.getBoundingClientRect();
-      const board = boardElement.getBoundingClientRect();
-    
-      const line = document.createElement("div");
-      line.classList.add("win-line");
-    
-      // Calculate dimensions and position
-      const x1 = start.left + start.width / 2 - board.left;
-      const y1 = start.top + start.height / 2 - board.top;
-      const x2 = end.left + end.width / 2 - board.left;
-      const y2 = end.top + end.height / 2 - board.top;
-    
-      const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-      const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
-    
-      // Set line styles
-      line.style.width = `${distance}px`;
-      line.style.left = `${x1}px`;
-      line.style.top = `${y1}px`;
-      line.style.transform = `rotate(${angle}deg)`;
-    
-      boardElement.appendChild(line);
-    }
-
-    
     // Function to get the best move for the robot
     function getBestMove() {
-      const winningMoves = getWinningMove(robot); 
-      if (winningMoves.length > 0) {
-        return winningMoves[0]; // Robot takes the winning spot
-      }
-
-      const blockingMoves = getWinningMove(player);
-      if (blockingMoves.length > 0) {
-        return blockingMoves[0]; // Block the player's winning move
-      }
-
-      // If no immediate win or block, pick a random move
       const emptyCells = boardState
         .map((cell, index) => (cell === "" ? index : null))
         .filter((index) => index !== null);
@@ -269,32 +213,7 @@
       return emptyCells[Math.floor(Math.random() * emptyCells.length)];
     }
 
-    // Function to check for a winning move (for either player or robot)
-    function getWinningMove(symbol) {
-      const winningMoves = [];
-      const winningCombos = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
-      ];
-
-      winningCombos.forEach(combo => {
-        const cells = combo.map(index => boardState[index]);
-        const emptyCells = combo.filter((index) => boardState[index] === "");
-        if (emptyCells.length === 1 && cells.filter(cell => cell === symbol).length === 2) {
-          winningMoves.push(emptyCells[0]);
-        }
-      });
-
-      return winningMoves;
-    }
-
-    // Check if the player or robot has won
+    // Check for a winner
     function checkWinner() {
       const winningCombos = [
         [0, 1, 2],
@@ -311,7 +230,13 @@
         const [a, b, c] = combo;
         if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
           gameOver = true;
-          winningCombo = combo;
+
+          // Highlight winning cells
+          combo.forEach((index) => {
+            const cell = boardElement.children[index];
+            cell.classList.add(boardState[a] === player ? "win" : "lose");
+          });
+
           if (boardState[a] === player) {
             scores.wins++;
             resultElement.textContent = "You Win!";
@@ -319,6 +244,7 @@
             scores.losses++;
             resultElement.textContent = "You Lose!";
           }
+
           saveScores();
           updateScoreboard();
           return true;
@@ -327,7 +253,7 @@
       return false;
     }
 
-    // Check if the board is full (draw)
+    // Check if the board is full
     function isBoardFull() {
       if (!boardState.includes("")) {
         gameOver = true;
@@ -344,7 +270,6 @@
     resetButton.addEventListener("click", () => {
       boardState = Array(9).fill("");
       gameOver = false;
-      winningCombo = [];
       resultElement.textContent = "";
       createBoard();
     });
