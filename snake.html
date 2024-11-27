@@ -120,6 +120,11 @@
         #back-to-menu:hover {
             background-color: #45a049;
         }
+
+        .menu-score {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -128,11 +133,15 @@
         <div id="menu" class="screen active">
             <h1>Snake Game</h1>
             <button id="start-game">Start Game</button>
+            <div class="menu-score">
+                <p>Last Score: <span id="last-score">0</span></p>
+                <p>High Score: <span id="high-score">0</span></p>
+            </div>
         </div>
         <div id="game" class="screen">
             <div id="score-container">
                 <div>Score: <span id="current-score">0</span></div>
-                <div>High Score: <span id="high-score">0</span></div>
+                <div>High Score: <span id="game-high-score">0</span></div>
             </div>
             <canvas id="game-board"></canvas>
         </div>
@@ -142,13 +151,15 @@
         const menuScreen = document.getElementById('menu');
         const gameScreen = document.getElementById('game');
         const startGameBtn = document.getElementById('start-game');
-        const currentScoreElement = document.getElementById('current-score');
+        const lastScoreElement = document.getElementById('last-score');
         const highScoreElement = document.getElementById('high-score');
+        const currentScoreElement = document.getElementById('current-score');
+        const gameHighScoreElement = document.getElementById('game-high-score');
         const canvas = document.getElementById('game-board');
         const ctx = canvas.getContext('2d');
 
-        // Increase the grid size to make squares bigger and fewer
-        const GRID_SIZE = 20; // Adjust grid size for better fit
+        // Reverting back the original grid size (20px grid, 25x15 grid dimensions)
+        const GRID_SIZE = 20;
         const SNAKE_COLOR = '#4CAF50';
         const SNAKE_BORDER_COLOR = '#45a049';
         const FOOD_COLOR = '#FF0000';
@@ -157,8 +168,8 @@
 
         function initGame() {
             // Adjust canvas size based on grid size
-            canvas.width = Math.floor(gameContainer.clientWidth / GRID_SIZE) * GRID_SIZE;
-            canvas.height = Math.floor(gameContainer.clientHeight / GRID_SIZE) * GRID_SIZE;
+            canvas.width = 500;
+            canvas.height = 300;
 
             snake = [{ x: 5, y: 5 }];
             food = generateFood();
@@ -166,7 +177,7 @@
             score = 0;
             highScore = localStorage.getItem('snakeHighScore') || 0;
             currentScoreElement.textContent = score;
-            highScoreElement.textContent = highScore;
+            gameHighScoreElement.textContent = highScore;
         }
 
         function generateFood() {
@@ -229,7 +240,7 @@
                 currentScoreElement.textContent = score;
                 if (score > highScore) {
                     highScore = score;
-                    highScoreElement.textContent = highScore;
+                    gameHighScoreElement.textContent = highScore;
                     localStorage.setItem('snakeHighScore', highScore);
                 }
             } else {
@@ -249,6 +260,7 @@
         function gameOver() {
             clearInterval(gameLoop);
             alert(`Game Over! Your score: ${score}`);
+            lastScoreElement.textContent = score;
             showScreen(menuScreen);
         }
 
