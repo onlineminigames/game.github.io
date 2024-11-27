@@ -147,7 +147,8 @@
         const canvas = document.getElementById('game-board');
         const ctx = canvas.getContext('2d');
 
-        const GRID_SIZE = 20;
+        // Increase the grid size to make the squares bigger and fewer
+        const GRID_SIZE = 30; // Increased grid size to make bigger squares
         const SNAKE_COLOR = '#4CAF50';
         const SNAKE_BORDER_COLOR = '#45a049';
         const FOOD_COLOR = '#FF0000';
@@ -155,6 +156,7 @@
         let snake, food, direction, gameLoop, score, highScore;
 
         function initGame() {
+            // Adjust the canvas dimensions based on the new grid size
             canvas.width = gameContainer.clientWidth - 20;
             canvas.height = gameContainer.clientHeight - 100;
 
@@ -352,4 +354,3 @@
     </script>
 </body>
 </html>
-
