@@ -200,7 +200,7 @@
   <a href="index" class="back-button">Back to Menu</a>
 
   <script>
-    // JavaScript code remains unchanged from the previous example.
+    // JavaScript code for Minimax and game logic
     const boardElement = document.getElementById("board");
     const resultElement = document.getElementById("result");
     const resetButton = document.getElementById("reset");
@@ -227,7 +227,7 @@
     }
 
     function createBoard() {
-      boardElement.innerHTML = ""; 
+      boardElement.innerHTML = "";
       boardState.forEach((cell, index) => {
         const cellElement = document.createElement("div");
         cellElement.className = "cell";
@@ -256,7 +256,7 @@
     function robotMove() {
       if (gameOver) return;
 
-      const bestMove = getBestMove();
+      const bestMove = minimax(boardState, 0, true);
       boardState[bestMove] = robot;
       createBoard();
 
@@ -264,44 +264,30 @@
       isBoardFull();
     }
 
-    function getBestMove() {
-      const winningMoves = getWinningMove(robot); 
-      if (winningMoves.length > 0) {
-        return winningMoves[0]; // Make a winning move if possible
+    // Minimax Algorithm to make the robot play optimally
+    function minimax(board, depth, isMaximizing) {
+      const winner = checkWinnerForMinimax(board);
+      if (winner === robot) return 10 - depth;
+      if (winner === player) return depth - 10;
+      if (isBoardFull(board)) return 0;
+
+      const emptyCells = getEmptyCells(board);
+      let bestScore = isMaximizing ? -Infinity : Infinity;
+
+      for (let i = 0; i < emptyCells.length; i++) {
+        const index = emptyCells[i];
+        board[index] = isMaximizing ? robot : player;
+        const score = minimax(board, depth + 1, !isMaximizing);
+        board[index] = ""; // Undo the move
+        bestScore = isMaximizing
+          ? Math.max(score, bestScore)
+          : Math.min(score, bestScore);
       }
-    
-      const blockingMoves = getWinningMove(player);
-      if (blockingMoves.length > 0) {
-        return blockingMoves[0]; // Block player's winning move if possible
-      }
-    
-      // Strategic move: Take center if available
-      if (boardState[4] === "") {
-        return 4;
-      }
-    
-      // Strategic move: Take a corner if available
-      const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
-      if (corners.length > 0) {
-        return corners[Math.floor(Math.random() * corners.length)];
-      }
-    
-      // Otherwise, take an edge if available
-      const edges = [1, 3, 5, 7].filter(index => boardState[index] === "");
-      if (edges.length > 0) {
-        return edges[Math.floor(Math.random() * edges.length)];
-      }
-    
-      // If no strategic moves, choose any empty cell
-      const emptyCells = boardState
-        .map((cell, index) => (cell === "" ? index : null))
-        .filter((index) => index !== null);
-    
-      return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+
+      return bestScore;
     }
 
-    function getWinningMove(symbol) {
-      const winningMoves = [];
+    function checkWinnerForMinimax(board) {
       const winningCombos = [
         [0, 1, 2],
         [3, 4, 5],
@@ -313,64 +299,62 @@
         [2, 4, 6],
       ];
 
-      winningCombos.forEach((combo) => {
+      for (const combo of winningCombos) {
         const [a, b, c] = combo;
-        if (
-          boardState[a] === symbol &&
-          boardState[b] === symbol &&
-          boardState[c] === ""
-        ) {
-          winningMoves.push(c);
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          return board[a]; // Returns "X" or "O" for the winner
         }
-      });
-
-      return winningMoves;
+      }
+      return null; // No winner yet
     }
 
     function checkWinner() {
-      const winningCombos = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
-      ];
-    
-      for (const combo of winningCombos) {
-        const [a, b, c] = combo;
-        if (
-          boardState[a] &&
-          boardState[a] === boardState[b] &&
-          boardState[a] === boardState[c]
-        ) {
-          gameOver = true;
-          const cells = document.querySelectorAll(".cell");
-          combo.forEach((index) => cells[index].classList.add(boardState[a] === player ? "win" : "lose"));
-          resultElement.textContent =
-            boardState[a] === player ? "You Win!" : "You Lose!";
-          boardState[a] === player ? scores.wins++ : scores.losses++;
-          saveScores();
-          updateScoreboard();
-          return true;
-        }
-      }
-      return false;
-    }
+      const winner = checkWinnerForMinimax(boardState);
 
-
-    function isBoardFull() {
-      if (!boardState.includes("")) {
+      if (winner) {
         gameOver = true;
-        scores.draws++;
-        resultElement.textContent = "It's a Draw!";
+        const cells = document.querySelectorAll(".cell");
+        const winningCombo = getWinningCombo(boardState, winner);
+        winningCombo.forEach(index => cells[index].classList.add(winner === player ? "win" : "lose"));
+        resultElement.textContent = winner === player ? "You Win!" : "You Lose!";
+        winner === player ? scores.wins++ : scores.losses++;
         saveScores();
         updateScoreboard();
         return true;
       }
+
       return false;
+    }
+
+    function getWinningCombo(board, symbol) {
+      const winningCombos = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+
+      for (const combo of winningCombos) {
+        const [a, b, c] = combo;
+        if (board[a] === symbol && board[b] === symbol && board[c] === symbol) {
+          return combo; // Return the winning combination
+        }
+      }
+      return [];
+    }
+
+    function isBoardFull(board) {
+      return board.every(cell => cell !== "");
+    }
+
+    function getEmptyCells(board) {
+      return board
+        .map((cell, index) => (cell === "" ? index : null))
+        .filter(index => index !== null);
     }
 
     resetButton.addEventListener("click", () => {
