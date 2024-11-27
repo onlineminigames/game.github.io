@@ -8,10 +8,20 @@
     body {
       font-family: 'Arial', sans-serif;
       text-align: center;
-      background: linear-gradient(135deg, #3a6e9f, #5a8fce);
+      background: linear-gradient(135deg, #5f5a9f, #9a4b5b); /* Smooth gradient for entire page */
       color: white;
       margin: 0;
       padding: 0;
+      animation: fadeIn 2s ease-out; /* Fade in the whole page */
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     h1 {
@@ -33,26 +43,39 @@
       margin-right: auto;
     }
 
+    /* Keyframe animation for button appearance */
+    @keyframes buttonAppear {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .game-link {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 250px; /* Increased width */
-      height: 120px; /* Increased height */
-      background: #6c8ebf; /* New color to fit the design */
+      width: 250px;
+      height: 120px;
+      background: #6c8ebf;
       color: white;
       text-decoration: none;
-      font-size: 1.6em; /* Larger text */
+      font-size: 1.6em;
       text-align: center;
       border-radius: 15px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s, box-shadow 0.2s;
+      animation: buttonAppear 1s ease-out; /* Dynamic animation for button appearance */
     }
 
     .game-link:hover {
       transform: translateY(-5px);
       box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
-      background: #4CAF50; /* Hover color */
+      background: #d94e4e; /* Hover color changed to reddish */
     }
 
     .game-link:active {
@@ -73,9 +96,9 @@
       }
 
       .game-link {
-        width: 230px; /* Larger width on mobile */
-        height: 110px; /* Larger height on mobile */
-        font-size: 1.4em; /* Larger font size on mobile */
+        width: 230px;
+        height: 110px;
+        font-size: 1.4em;
       }
     }
   </style>
