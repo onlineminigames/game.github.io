@@ -38,7 +38,7 @@
             overflow: hidden;
             position: relative;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             height: 90vh;
             max-height: 600px;
         }
@@ -147,8 +147,8 @@
         const canvas = document.getElementById('game-board');
         const ctx = canvas.getContext('2d');
 
-        // Increase the grid size to make the squares bigger and fewer
-        const GRID_SIZE = 30; // Increased grid size to make bigger squares
+        // Increase the grid size to make squares bigger and fewer
+        const GRID_SIZE = 20; // Adjust grid size for better fit
         const SNAKE_COLOR = '#4CAF50';
         const SNAKE_BORDER_COLOR = '#45a049';
         const FOOD_COLOR = '#FF0000';
@@ -156,9 +156,9 @@
         let snake, food, direction, gameLoop, score, highScore;
 
         function initGame() {
-            // Adjust the canvas dimensions based on the new grid size
-            canvas.width = gameContainer.clientWidth - 20;
-            canvas.height = gameContainer.clientHeight - 100;
+            // Adjust canvas size based on grid size
+            canvas.width = Math.floor(gameContainer.clientWidth / GRID_SIZE) * GRID_SIZE;
+            canvas.height = Math.floor(gameContainer.clientHeight / GRID_SIZE) * GRID_SIZE;
 
             snake = [{ x: 5, y: 5 }];
             food = generateFood();
@@ -176,71 +176,37 @@
         }
 
         function drawSnake() {
-            snake.forEach((segment, index) => {
-                const x = segment.x * GRID_SIZE;
-                const y = segment.y * GRID_SIZE;
-
-                ctx.fillStyle = SNAKE_COLOR;
-                ctx.strokeStyle = SNAKE_BORDER_COLOR;
-
-                if (index === 0) {
-                    // Draw head
-                    ctx.beginPath();
-                    ctx.arc(x + GRID_SIZE / 2, y + GRID_SIZE / 2, GRID_SIZE / 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Draw eyes
-                    ctx.fillStyle = 'white';
-                    ctx.beginPath();
-                    ctx.arc(x + GRID_SIZE / 3, y + GRID_SIZE / 3, GRID_SIZE / 8, 0, 2 * Math.PI);
-                    ctx.arc(x + 2 * GRID_SIZE / 3, y + GRID_SIZE / 3, GRID_SIZE / 8, 0, 2 * Math.PI);
-                    ctx.fill();
-
-                    ctx.fillStyle = 'black';
-                    ctx.beginPath();
-                    ctx.arc(x + GRID_SIZE / 3, y + GRID_SIZE / 3, GRID_SIZE / 16, 0, 2 * Math.PI);
-                    ctx.arc(x + 2 * GRID_SIZE / 3, y + GRID_SIZE / 3, GRID_SIZE / 16, 0, 2 * Math.PI);
-                    ctx.fill();
-                } else {
-                    // Draw body
-                    ctx.beginPath();
-                    ctx.arc(x + GRID_SIZE / 2, y + GRID_SIZE / 2, GRID_SIZE / 2 - 1, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            });
+            ctx.beginPath();
+            ctx.moveTo(snake[0].x * GRID_SIZE + GRID_SIZE / 2, snake[0].y * GRID_SIZE + GRID_SIZE / 2);
+            for (let i = 1; i < snake.length; i++) {
+                const x = snake[i].x * GRID_SIZE + GRID_SIZE / 2;
+                const y = snake[i].y * GRID_SIZE + GRID_SIZE / 2;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineWidth = GRID_SIZE;
+            ctx.strokeStyle = SNAKE_COLOR;
+            ctx.lineCap = 'round';
+            ctx.stroke();
         }
 
         function drawFood() {
-            const x = food.x * GRID_SIZE;
-            const y = food.y * GRID_SIZE;
+            const x = food.x * GRID_SIZE + GRID_SIZE / 2;
+            const y = food.y * GRID_SIZE + GRID_SIZE / 2;
 
             ctx.fillStyle = FOOD_COLOR;
             ctx.beginPath();
-            ctx.arc(x + GRID_SIZE / 2, y + GRID_SIZE / 2, GRID_SIZE / 2, 0, 2 * Math.PI);
-            ctx.fill();
-
-            // Draw leaf
-            ctx.fillStyle = '#00AA00';
-            ctx.beginPath();
-            ctx.ellipse(x + GRID_SIZE * 0.7, y, GRID_SIZE * 0.25, GRID_SIZE * 0.15, Math.PI / 4, 0, 2 * Math.PI);
+            ctx.arc(x, y, GRID_SIZE / 2, 0, 2 * Math.PI);
             ctx.fill();
         }
 
         function drawCheckeredBackground() {
-            const squareSize = GRID_SIZE;
-            const rows = canvas.height / squareSize;
-            const cols = canvas.width / squareSize;
+            const rows = Math.floor(canvas.height / GRID_SIZE);
+            const cols = Math.floor(canvas.width / GRID_SIZE);
 
             for (let i = 0; i < rows; i++) {
                 for (let j = 0; j < cols; j++) {
-                    if ((i + j) % 2 === 0) {
-                        ctx.fillStyle = '#f0f0f0';
-                    } else {
-                        ctx.fillStyle = '#e0e0e0';
-                    }
-                    ctx.fillRect(j * squareSize, i * squareSize, squareSize, squareSize);
+                    ctx.fillStyle = (i + j) % 2 === 0 ? '#f0f0f0' : '#e0e0e0';
+                    ctx.fillRect(j * GRID_SIZE, i * GRID_SIZE, GRID_SIZE, GRID_SIZE);
                 }
             }
         }
