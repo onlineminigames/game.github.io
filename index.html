@@ -1,142 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mini Games Hub</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
-      background: linear-gradient(135deg, #2b5876, #4e4376); /* Gradient background */
-      color: white;
-      margin: 0;
-      padding: 0;
-      height: 100vh; /* Ensure the background covers the entire screen */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Game Hub</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+        }
 
-    h1 {
-      margin-top: 10px; /* Reduced space between title and top */
-      font-size: 3em;
-      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-    }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            padding: 20px;
+        }
 
-    .game-menu {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr); /* 3 games per row */
-      gap: 20px;
-      margin-top: 30px;
-      padding: 20px;
-      justify-items: center;
-      width: 90%;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 0.5s ease forwards;
+        }
 
-    /* Keyframe animation for button appearance */
-    @keyframes buttonAppear {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
 
-    .game-link {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 250px;
-      height: 120px;
-      background: #6c8ebf;
-      color: white;
-      text-decoration: none;
-      font-size: 1.6em;
-      text-align: center;
-      border-radius: 15px;
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      opacity: 0; /* Start as invisible */
-      animation: buttonAppear 1s ease-out forwards;
-      font-weight: bold; /* Make text bold */
-    }
+        .game-button {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            transform: scale(0.8);
+        }
 
-    /* Animation delay for each button (starts after the previous one) */
-    .game-link:nth-child(1) {
-      animation-delay: 0.5s;
-    }
-    .game-link:nth-child(2) {
-      animation-delay: 0.7s;
-    }
-    .game-link:nth-child(3) {
-      animation-delay: 0.9s;
-    }
-    .game-link:nth-child(4) {
-      animation-delay: 1.1s;
-    }
-    .game-link:nth-child(5) {
-      animation-delay: 1.3s;
-    }
-    .game-link:nth-child(6) {
-      animation-delay: 1.5s;
-    }
-    .game-link:nth-child(7) {
-      animation-delay: 1.7s;
-    }
-    .game-link:nth-child(8) {
-      animation-delay: 1.9s;
-    }
+        .game-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
 
-    /* Hover effect: Lighter red on hover */
-    .game-link:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
-      background: #e06d6d; /* Lighter reddish hover color */
-    }
+        .game-button:active {
+            transform: scale(0.95);
+        }
 
-    .game-link:active {
-      transform: translateY(2px);
-      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-    }
+        @keyframes fadeInDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    footer {
-      margin-top: 50px;
-      font-size: 0.9em;
-      opacity: 0.7;
-    }
+        @keyframes fadeInScale {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
-    @media (max-width: 600px) {
-      .game-menu {
-        grid-template-columns: 1fr 1fr; /* 2 games per row on smaller screens */
-        gap: 15px;
-      }
+        @media (max-width: 768px) {
+            .game-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
-      .game-link {
-        width: 230px;
-        height: 110px;
-        font-size: 1.4em;
-      }
-    }
-  </style>
+        @media (max-width: 480px) {
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Mini Games Hub</h1>
-  <div class="game-menu">
-    <a href="tic-tac-toe" class="game-link">Tic Tac Toe</a>
-    <a href="snake" class="game-link">Snake</a>
-    <a href="sudoku" class="game-link">Sudoku</a>
-    <a href="block-blast" class="game-link">Block Blast</a>
-    <a href="2048" class="game-link">2048</a>
-    <a href="minesweeper" class="game-link">Minesweeper</a>
-    <a href="pacman" class="game-link">Pac-Man</a>
-    <a href="solitaire" class="game-link">Solitaire</a>
-  </div>
+    <div class="container">
+        <h1>Mini Game Hub</h1>
+        <div class="game-grid" id="gameGrid"></div>
+    </div>
+
+    <script>
+        const games = [
+            { name: 'Tic Tac Toe', color: '#f44336', url: 'tic-tac-toe' },
+            { name: 'Snake', color: '#2196f3', url: 'snake' },
+            { name: 'Sudoku', color: '#4caf50', url: 'sudoku' },
+            { name: 'Block Blast', color: '#ffc107', url: 'block-blast' },
+            { name: '2048', color: '#e91e63', url: '2048' },
+            { name: 'Minesweeper', color: '#9c27b0', url: 'minesweeper' },
+            { name: 'Pac-Man', color: '#3f51b5', url: 'pacman' },
+            { name: 'Solitaire', color: '#009688', url: 'solitaire' }
+        ];
+
+        const gameGrid = document.getElementById('gameGrid');
+
+        games.forEach((game, index) => {
+            const button = document.createElement('button');
+            button.className = 'game-button';
+            button.textContent = game.name;
+            button.style.backgroundColor = game.color;
+            button.style.animationDelay = `${index * 0.1}s`;
+            button.style.animation = 'fadeInScale 0.5s ease forwards';
+            
+            button.addEventListener('click', () => {
+                window.location.href = game.url;  // Redirect to the respective game page
+            });
+
+            gameGrid.appendChild(button);
+        });
+    </script>
 </body>
 </html>
