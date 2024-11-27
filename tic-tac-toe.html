@@ -192,7 +192,7 @@
       robotMove();
     }
 
-    // Robot makes a move
+    // Robot makes a smart move
     function robotMove() {
       if (gameOver) return;
 
@@ -206,11 +206,56 @@
 
     // Function to get the best move for the robot
     function getBestMove() {
+      const winningMoves = getWinningMove(robot); 
+      if (winningMoves.length > 0) {
+        return winningMoves[0]; // Robot takes the winning spot
+      }
+
+      const blockingMoves = getWinningMove(player);
+      if (blockingMoves.length > 0) {
+        return blockingMoves[0]; // Block the player's winning move
+      }
+
+      // If no immediate win or block, pick the center if available
+      if (boardState[4] === "") return 4;
+
+      // Pick a random corner if available
+      const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
+      if (corners.length > 0) {
+        return corners[Math.floor(Math.random() * corners.length)];
+      }
+
+      // Pick a random empty cell
       const emptyCells = boardState
         .map((cell, index) => (cell === "" ? index : null))
         .filter((index) => index !== null);
 
       return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    }
+
+    // Function to check for a winning move (for either player or robot)
+    function getWinningMove(symbol) {
+      const winningMoves = [];
+      const winningCombos = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+
+      winningCombos.forEach(combo => {
+        const cells = combo.map(index => boardState[index]);
+        const emptyCells = combo.filter((index) => boardState[index] === "");
+        if (emptyCells.length === 1 && cells.filter(cell => cell === symbol).length === 2) {
+          winningMoves.push(emptyCells[0]);
+        }
+      });
+
+      return winningMoves;
     }
 
     // Check for a winner
