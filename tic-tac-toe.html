@@ -100,9 +100,10 @@
       position: absolute;
       background: red;
       height: 5px;
-      width: 100%;
       z-index: 10;
+      transform-origin: 0 50%; /* Set the rotation pivot point */
     }
+
 
     .vertical-line {
       width: 5px;
@@ -217,24 +218,36 @@
 
     // Draw the winning line
     function drawWinningLine(combo) {
-      const [a, b, c] = combo;
-
-      const start = boardElement.children[a].getBoundingClientRect();
-      const end = boardElement.children[c].getBoundingClientRect();
+      const [startIndex, middleIndex, endIndex] = combo;
+    
+      const startCell = boardElement.children[startIndex];
+      const endCell = boardElement.children[endIndex];
+    
+      const start = startCell.getBoundingClientRect();
+      const end = endCell.getBoundingClientRect();
       const board = boardElement.getBoundingClientRect();
-
+    
       const line = document.createElement("div");
       line.classList.add("win-line");
-
-      line.style.left = `${(start.left + end.left) / 2 - board.left}px`;
-      line.style.top = `${(start.top + end.top) / 2 - board.top}px`;
-      line.style.transform = `rotate(${Math.atan2(
-        end.top - start.top,
-        end.left - start.left
-      )}rad)`;
-
+    
+      // Calculate dimensions and position
+      const x1 = start.left + start.width / 2 - board.left;
+      const y1 = start.top + start.height / 2 - board.top;
+      const x2 = end.left + end.width / 2 - board.left;
+      const y2 = end.top + end.height / 2 - board.top;
+    
+      const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+      const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+    
+      // Set line styles
+      line.style.width = `${distance}px`;
+      line.style.left = `${x1}px`;
+      line.style.top = `${y1}px`;
+      line.style.transform = `rotate(${angle}deg)`;
+    
       boardElement.appendChild(line);
     }
+
     
     // Function to get the best move for the robot
     function getBestMove() {
