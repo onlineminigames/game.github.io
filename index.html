@@ -37,7 +37,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px 40px;
+      width: 200px; /* Fixed width */
+      height: 100px; /* Fixed height */
       background: #6c8ebf; /* New color to fit the design */
       color: white;
       text-decoration: none;
@@ -46,7 +47,6 @@
       border-radius: 15px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s, box-shadow 0.2s;
-      height: 100px; /* Adjusted to be smaller */
     }
 
     .game-link:hover {
@@ -73,9 +73,9 @@
       }
 
       .game-link {
-        padding: 15px 30px;
+        width: 180px; /* Slightly smaller width on mobile */
+        height: 90px; /* Slightly smaller height on mobile */
         font-size: 1.3em;
-        height: 90px; /* Slightly smaller height on smaller screens */
       }
     }
   </style>
