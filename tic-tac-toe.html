@@ -281,9 +281,9 @@
 
     function minimax(board, depth, isMaximizing) {
       const winner = checkWinnerForMinimax(board);
-      if (winner === robot) return 10 - depth; // Robot wins
-      if (winner === player) return depth - 10; // Player wins
-      if (isBoardFull(board)) return 0; // Draw
+      if (winner === robot) return 10 - depth;
+      if (winner === player) return depth - 10;
+      if (isBoardFull(board)) return 0;
 
       const emptyCells = getEmptyCells(board);
       let bestScore = isMaximizing ? -Infinity : Infinity;
@@ -291,10 +291,8 @@
       for (let i = 0; i < emptyCells.length; i++) {
         const index = emptyCells[i];
         board[index] = isMaximizing ? robot : player;
-
         const score = minimax(board, depth + 1, !isMaximizing);
         board[index] = ""; // Undo the move
-
         bestScore = isMaximizing
           ? Math.max(score, bestScore)
           : Math.min(score, bestScore);
