@@ -20,7 +20,7 @@
     }
 
     h1 {
-      margin-top: 30px;
+      margin-top: 10px; /* Reduced space between title and top */
       font-size: 3em;
       text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
@@ -40,7 +40,7 @@
       transform: translateY(-20px); /* Move the grid up a little */
     }
 
-    /* Keyframe animation for button appearance */
+    /* Keyframe animation for button disappearance */
     @keyframes buttonDisappear {
       from {
         opacity: 1;
@@ -50,6 +50,7 @@
       }
     }
 
+    /* Keyframe animation for button appearance */
     @keyframes buttonAppear {
       from {
         opacity: 0;
@@ -74,34 +75,39 @@
       text-align: center;
       border-radius: 15px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      animation: buttonDisappear 0s ease-out, buttonAppear 1s ease-out forwards;
-      animation-delay: 0s; /* Set delay */
+      animation: buttonDisappear 1s ease-out forwards, buttonAppear 1s ease-out forwards;
+      animation-delay: 0s; /* Initial delay is 0 */
     }
 
-    /* Animation delay for each button */
-    .game-link:nth-child(1) {
-      animation-delay: 0.1s;
-    }
-    .game-link:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    .game-link:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-    .game-link:nth-child(4) {
-      animation-delay: 0.4s;
-    }
-    .game-link:nth-child(5) {
+    /* Animation delay for each button (starts after the disappearance) */
+    .game-menu {
+      animation: buttonDisappear 1s ease-out forwards;
       animation-delay: 0.5s;
     }
+
+    .game-link:nth-child(1) {
+      animation-delay: 1s;
+    }
+    .game-link:nth-child(2) {
+      animation-delay: 1.2s;
+    }
+    .game-link:nth-child(3) {
+      animation-delay: 1.4s;
+    }
+    .game-link:nth-child(4) {
+      animation-delay: 1.6s;
+    }
+    .game-link:nth-child(5) {
+      animation-delay: 1.8s;
+    }
     .game-link:nth-child(6) {
-      animation-delay: 0.6s;
+      animation-delay: 2s;
     }
     .game-link:nth-child(7) {
-      animation-delay: 0.7s;
+      animation-delay: 2.2s;
     }
     .game-link:nth-child(8) {
-      animation-delay: 0.8s;
+      animation-delay: 2.4s;
     }
 
     /* Hover effect: Lighter red on hover */
