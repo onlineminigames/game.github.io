@@ -8,20 +8,15 @@
     body {
       font-family: 'Arial', sans-serif;
       text-align: center;
-      background: linear-gradient(135deg, #5f5a9f, #9a4b5b); /* Smooth gradient for entire page */
+      background: linear-gradient(135deg, #2b5876, #4e4376); /* Keep the original gradient */
       color: white;
       margin: 0;
       padding: 0;
-      animation: fadeIn 2s ease-out; /* Fade in the whole page */
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+      height: 100vh; /* Ensure the background covers the whole screen */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     h1 {
@@ -43,7 +38,7 @@
       margin-right: auto;
     }
 
-    /* Keyframe animation for button appearance */
+    /* Keyframe animation for button appearance with a delay */
     @keyframes buttonAppear {
       from {
         opacity: 0;
@@ -69,13 +64,39 @@
       border-radius: 15px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s, box-shadow 0.2s;
-      animation: buttonAppear 1s ease-out; /* Dynamic animation for button appearance */
+      animation: buttonAppear 1s ease-out;
+    }
+
+    /* Add delays to each button for staggered appearance */
+    .game-link:nth-child(1) {
+      animation-delay: 0s;
+    }
+    .game-link:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    .game-link:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+    .game-link:nth-child(4) {
+      animation-delay: 0.3s;
+    }
+    .game-link:nth-child(5) {
+      animation-delay: 0.4s;
+    }
+    .game-link:nth-child(6) {
+      animation-delay: 0.5s;
+    }
+    .game-link:nth-child(7) {
+      animation-delay: 0.6s;
+    }
+    .game-link:nth-child(8) {
+      animation-delay: 0.7s;
     }
 
     .game-link:hover {
       transform: translateY(-5px);
       box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
-      background: #d94e4e; /* Hover color changed to reddish */
+      background: #d94e4e; /* Reddish hover color */
     }
 
     .game-link:active {
