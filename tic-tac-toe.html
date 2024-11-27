@@ -39,9 +39,10 @@
       max-width: 400px;
       width: 90%;
       margin-top: 10px;
+      opacity: 0;
       transform: scaleY(0);  /* Start with container collapsed */
       transform-origin: top;  /* Expand downwards */
-      transition: transform 0.5s ease-in-out;  /* Smooth expansion */
+      transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;  /* Smooth expansion */
     }
 
     .scoreboard {
