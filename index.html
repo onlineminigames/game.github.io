@@ -22,7 +22,7 @@
 
     .game-menu {
       display: grid;
-      grid-template-columns: repeat(3, 1fr); /* 3 games per row for the first two rows */
+      grid-template-columns: repeat(3, 1fr); /* 3 games per row */
       gap: 15px;
       margin-top: 50px;
       padding: 20px;
@@ -60,14 +60,6 @@
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
     }
 
-    /* Third row with two buttons */
-    .game-menu > .game-link:nth-child(6),
-    .game-menu > .game-link:nth-child(7) {
-      grid-column: span 3; /* These two buttons take the full row */
-      height: 150px; /* Bigger buttons for the third row */
-      padding: 30px 60px;
-    }
-
     footer {
       margin-top: 50px;
       font-size: 0.9em;
@@ -84,13 +76,6 @@
         padding: 15px 30px;
         font-size: 1.3em;
         height: 90px; /* Slightly smaller height on smaller screens */
-      }
-
-      /* Last two buttons still bigger on small screens */
-      .game-menu > .game-link:nth-child(6),
-      .game-menu > .game-link:nth-child(7) {
-        grid-column: span 2;
-        height: 120px;
       }
     }
   </style>
