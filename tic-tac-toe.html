@@ -5,21 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tic Tac Toe</title>
   <style>
-   body {
-    font-family: 'Roboto', Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(135deg, #3a6e9f, #5a8fce);  /* Slightly darker blue gradient */
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;  /* Align content to the top */
-    min-height: 100vh;
-    padding-top: 20px; /* Add some padding to the top */
-  }
-
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #3a6e9f, #5a8fce);  /* Slightly darker blue gradient */
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;  /* Align content to the top */
+      min-height: 100vh;
+      padding-top: 20px; /* Add some padding to the top */
+    }
 
     h1 {
       font-size: 3em;
@@ -53,7 +52,7 @@
       justify-content: space-between;  /* To place the texts next to each other */
       width: 200px;  /* Adjust the width to fit both texts */
     }
-    
+
     .scoreboard p {
       margin: 0;
     }
@@ -110,7 +109,6 @@
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-
     #result {
       margin-top: 15px;
       font-size: 1.5em;
@@ -130,6 +128,15 @@
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
       transition: background 0.3s;
       display: none; /* Hide initially */
+      opacity: 0; /* Set initial opacity to 0 for animation */
+      transform: translateY(30px); /* Initial off-screen position for animation */
+      transition: all 0.5s ease-in-out; /* Smooth transition for opacity and position */
+    }
+
+    #reset.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0); /* Bring button into view */
     }
 
     #reset:hover {
@@ -270,15 +277,15 @@
     
       const blockingMoves = getWinningMove(player);
       if (blockingMoves.length > 0) {
-        return blockingMoves[0]; // Block player's winning move if possible
+        return blockingMoves[0]; // Block the player from winning
       }
     
-      // Take the center if available
+      // Otherwise, take the center if available
       if (boardState[4] === "") {
         return 4;
       }
     
-      // Take a corner if available
+      // Otherwise, take corners first
       const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
       if (corners.length > 0) {
         return corners[Math.floor(Math.random() * corners.length)];
@@ -318,25 +325,32 @@
         const [a, b, c] = combination;
         if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
           winner = boardState[a];
-          combination.forEach(index => document.querySelector(`.cell[data-index="${index}"]`).classList.add("win"));
+          combination.forEach(index => {
+            const cell = document.querySelector(`.cell[data-index="${index}"]`);
+            if (winner === player) {
+              cell.classList.add("win");
+            } else if (winner === robot) {
+              cell.classList.add("lose");
+            }
+          });
         }
       });
 
       if (winner === player) {
-        resultElement.textContent = "You win!";
+        resultElement.textContent = "You Win!";
         scores.wins++;
         gameOver = true;
-        resetButton.style.display = "block";
+        resetButton.classList.add("show");
       } else if (winner === robot) {
-        resultElement.textContent = "Robot wins!";
+        resultElement.textContent = "You Lose!";
         scores.losses++;
         gameOver = true;
-        resetButton.style.display = "block";
+        resetButton.classList.add("show");
       } else if (isBoardFull()) {
-        resultElement.textContent = "It's a draw!";
+        resultElement.textContent = "It's a Draw!";
         scores.draws++;
         gameOver = true;
-        resetButton.style.display = "block";
+        resetButton.classList.add("show");
       }
 
       saveScores();
@@ -349,11 +363,12 @@
     }
 
     resetButton.addEventListener("click", () => {
+      resetButton.classList.remove("show");
+      resultElement.textContent = "";
       boardState = Array(9).fill("");
       createBoard();
-      resultElement.textContent = "";
       gameOver = false;
-      resetButton.style.display = "none";
+      setTimeout(() => resetButton.style.display = "none", 500);
     });
 
     createBoard();
