@@ -194,26 +194,45 @@
 
         function onDragStart(event) {
             event.preventDefault();
-            let targetBlock = event.target.closest(".block");
-            let offsetX = event.clientX || event.touches[0].clientX;
-            let offsetY = event.clientY || event.touches[0].clientY;
-
+            const targetBlock = event.target.closest(".block");
+            const rect = targetBlock.getBoundingClientRect();
+            let offsetX, offsetY;
+        
+            if (event.type === "mousedown") {
+                offsetX = event.clientX - rect.left;
+                offsetY = event.clientY - rect.top;
+            } else if (event.type === "touchstart") {
+                offsetX = event.touches[0].clientX - rect.left;
+                offsetY = event.touches[0].clientY - rect.top;
+            }
+        
             const moveBlock = (e) => {
-                const x = e.clientX || e.touches[0].clientX;
-                const y = e.clientY || e.touches[0].clientY;
+                let x, y;
+        
+                if (e.type === "mousemove") {
+                    x = e.clientX - offsetX;
+                    y = e.clientY - offsetY;
+                } else if (e.type === "touchmove") {
+                    x = e.touches[0].clientX - offsetX;
+                    y = e.touches[0].clientY - offsetY;
+                }
+        
                 targetBlock.style.position = "absolute";
                 targetBlock.style.zIndex = 1000;
-                targetBlock.style.left = `${x - offsetX}px`;
-                targetBlock.style.top = `${y - offsetY}px`;
+                targetBlock.style.left = `${x}px`;
+                targetBlock.style.top = `${y}px`;
             };
-
+        
             const stopDragging = () => {
                 document.removeEventListener("mousemove", moveBlock);
                 document.removeEventListener("mouseup", stopDragging);
                 document.removeEventListener("touchmove", moveBlock);
                 document.removeEventListener("touchend", stopDragging);
+        
+                // Reset the block's z-index after dragging stops
+                targetBlock.style.zIndex = "";
             };
-
+        
             document.addEventListener("mousemove", moveBlock);
             document.addEventListener("mouseup", stopDragging);
             document.addEventListener("touchmove", moveBlock, { passive: false });
