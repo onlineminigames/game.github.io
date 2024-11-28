@@ -7,147 +7,254 @@
     <style>
         body {
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+        }
+
+        #game-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: linear-gradient(to bottom, #6db3f2, #1e69de);
-            color: #fff;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        h1 {
-            font-size: 36px;
-            margin: 20px 0;
-        }
-
-        .game-container {
-            position: relative;
+            gap: 20px;
             width: 400px;
-            height: 400px;
-            background-color: #2c3e50;
+            height: 600px;
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #title {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            color: white;
+            font-size: 16px;
+        }
+
+        #grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
-            gap: 1px;
+            gap: 2px;
+            width: 320px;
+            height: 320px;
+            background: #111827;
+            border: 2px solid #000;
+            border-radius: 10px;
         }
 
         .grid-cell {
-            background-color: #34495e;
             width: 100%;
             height: 100%;
+            background: #2d3748;
+            border-radius: 5px;
         }
 
-        .grid-cell.filled {
-            background-color: #e74c3c;
-        }
-
-        .blocks-container {
+        #blocks-container {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
+            gap: 15px;
+            width: 100%;
         }
 
         .block {
-            display: inline-block;
-            position: absolute;
-            z-index: 100;
+            display: grid;
+            gap: 2px;
+            cursor: grab;
+            width: fit-content;
         }
 
-        .block-piece {
-            background-color: #3498db;
-            width: 50px;
-            height: 50px;
+        .block-cell {
+            width: 30px;
+            height: 30px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #restart-btn {
+            background: #f59e0b;
+            color: white;
+            font-size: 16px;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #restart-btn:hover {
+            background: #eab308;
+        }
+
+        .gold {
+            color: #ffd700;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Block Blast</h1>
-    <div class="game-container"></div>
-    <div class="blocks-container"></div>
+    <div id="game-container">
+        <div id="title">Block Blast</div>
+        <div id="header">
+            <div>🏆 <span id="high-score" class="gold">0</span></div>
+            <div id="score">0</div>
+        </div>
+        <div id="grid"></div>
+        <div id="blocks-container"></div>
+        <button id="restart-btn">Restart</button>
+    </div>
 
     <script>
-        const GRID_SIZE = 8;
-        const CELL_SIZE = 50;
+        const gridSize = 8;
+        const grid = document.getElementById("grid");
+        const blocksContainer = document.getElementById("blocks-container");
+        const scoreDisplay = document.getElementById("score");
+        const highScoreDisplay = document.getElementById("high-score");
+        const restartBtn = document.getElementById("restart-btn");
 
-        const gameContainer = document.querySelector('.game-container');
-        const blocksContainer = document.querySelector('.blocks-container');
-        let gameGrid = JSON.parse(localStorage.getItem('blockBlastGrid')) || Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+        let gridState = loadState("gridState") || Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+        let currentBlocks = loadState("currentBlocks") || [];
+        let score = loadState("score") || 0;
+        let highScore = localStorage.getItem("blockGameHighScore") || 0;
 
-        function renderGrid() {
-            gameContainer.innerHTML = '';
-            for (let y = 0; y < GRID_SIZE; y++) {
-                for (let x = 0; x < GRID_SIZE; x++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell';
-                    cell.dataset.x = x;
-                    cell.dataset.y = y;
-                    if (gameGrid[y][x] === 1) {
-                        cell.classList.add('filled');
+        highScoreDisplay.textContent = highScore;
+        scoreDisplay.textContent = score;
+
+        function createGrid() {
+            grid.innerHTML = "";
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    const cell = document.createElement("div");
+                    cell.classList.add("grid-cell");
+                    if (gridState[row][col] === 1) {
+                        cell.style.backgroundColor = "#888";
                     }
-                    gameContainer.appendChild(cell);
+                    grid.appendChild(cell);
                 }
             }
         }
 
-        function generateShapes() {
-            blocksContainer.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                createBlock(generateRandomShape());
+        function createBlocks() {
+            blocksContainer.innerHTML = "";
+            if (currentBlocks.length === 0) {
+                for (let i = 0; i < 3; i++) {
+                    const block = generateRandomBlock();
+                    currentBlocks.push(block.pattern);
+                    blocksContainer.appendChild(block.element);
+                }
+                saveState("currentBlocks", currentBlocks);
+            } else {
+                currentBlocks.forEach(pattern => {
+                    const block = createBlockElement(pattern);
+                    blocksContainer.appendChild(block);
+                });
             }
         }
 
-        function createBlock(shape) {
-            const block = document.createElement('div');
-            block.className = 'block';
-            block.dataset.shape = JSON.stringify(shape);
+        function generateRandomBlock() {
+            const pattern = getRandomBlockPattern();
+            const element = createBlockElement(pattern);
+            return { pattern, element };
+        }
 
-            shape.forEach((row, y) => {
-                row.forEach((cell, x) => {
-                    if (cell === 1) {
-                        const blockPiece = document.createElement('div');
-                        blockPiece.className = 'block-piece';
-                        blockPiece.style.left = `${x * CELL_SIZE}px`;
-                        blockPiece.style.top = `${y * CELL_SIZE}px`;
-                        block.appendChild(blockPiece);
-                    }
+        function createBlockElement(pattern) {
+            const block = document.createElement("div");
+            block.classList.add("block");
+            const color = getRandomColor();
+
+            block.style.gridTemplateColumns = `repeat(${pattern[0].length}, 1fr)`;
+            block.style.gridTemplateRows = `repeat(${pattern.length}, 1fr)`;
+
+            pattern.forEach(row => {
+                row.forEach(cell => {
+                    const blockCell = document.createElement("div");
+                    blockCell.classList.add("block-cell");
+                    blockCell.style.backgroundColor = cell === 1 ? color : "transparent";
+                    block.appendChild(blockCell);
                 });
             });
 
-            block.addEventListener('mousedown', onDragStart);
-            block.addEventListener('touchstart', onDragStart, { passive: false });
-            blocksContainer.appendChild(block);
+            // Add drag-and-drop listeners
+            block.addEventListener("mousedown", onDragStart);
+            block.addEventListener("touchstart", onDragStart, { passive: false });
+
+            return block;
         }
 
-        function generateRandomShape() {
-            const shapes = [
-                [[1, 1, 1]],
-                [[1], [1], [1]],
-                [[1, 1], [1, 1]],
-                [[1, 1, 0], [0, 1, 1]],
-                [[0, 1, 1], [1, 1, 0]]
-            ];
-            return shapes[Math.floor(Math.random() * shapes.length)];
+        function onDragStart(event) {
+            event.preventDefault();
+            const targetBlock = event.target.closest(".block");
+            const rect = targetBlock.getBoundingClientRect();
+            let offsetX, offsetY;
+        
+            if (event.type === "mousedown") {
+                offsetX = event.clientX - rect.left;
+                offsetY = event.clientY - rect.top;
+            } else if (event.type === "touchstart") {
+                offsetX = event.touches[0].clientX - rect.left;
+                offsetY = event.touches[0].clientY - rect.top;
+            }
+        
+            const moveBlock = (e) => {
+                let x, y;
+        
+                if (e.type === "mousemove") {
+                    x = e.clientX - offsetX;
+                    y = e.clientY - offsetY;
+                } else if (e.type === "touchmove") {
+                    x = e.touches[0].clientX - offsetX;
+                    y = e.touches[0].clientY - offsetY;
+                }
+        
+                targetBlock.style.position = "absolute";
+                targetBlock.style.zIndex = 1000;
+                targetBlock.style.left = `${x}px`;
+                targetBlock.style.top = `${y}px`;
+            };
+        
+            const stopDragging = () => {
+                document.removeEventListener("mousemove", moveBlock);
+                document.removeEventListener("mouseup", stopDragging);
+                document.removeEventListener("touchmove", moveBlock);
+                document.removeEventListener("touchend", stopDragging);
+        
+                // Reset the block's z-index after dragging stops
+                targetBlock.style.zIndex = "";
+                
+                // Snap to grid logic
+                const x = parseInt(targetBlock.style.left);
+                const y = parseInt(targetBlock.style.top);
+
+                snapToGrid(targetBlock, x, y);
+            };
+        
+            document.addEventListener("mousemove", moveBlock);
+            document.addEventListener("mouseup", stopDragging);
+            document.addEventListener("touchmove", moveBlock, { passive: false });
+            document.addEventListener("touchend", stopDragging);
         }
 
         function snapToGrid(block, x, y) {
-            const gridX = Math.floor(x / CELL_SIZE);
-            const gridY = Math.floor(y / CELL_SIZE);
-            const blockShape = JSON.parse(block.dataset.shape);
+            const gridX = Math.floor(x / 40);  // Adjust the grid size
+            const gridY = Math.floor(y / 40);  // Adjust the grid size
+            const blockPattern = block.dataset.shape.split(",").map(row => row.split("").map(Number));
 
-            if (canPlaceShape(gridX, gridY, blockShape)) {
-                placeShape(gridX, gridY, blockShape);
-                block.remove();
-                if (blocksContainer.children.length === 0) {
-                    generateShapes();
-                }
-            } else {
-                resetBlockPosition(block);
+            // Check if it fits the grid and place it
+            if (canPlaceShape(gridX, gridY, blockPattern)) {
+                placeShape(gridX, gridY, blockPattern);
+                block.remove(); // Remove block from the blocks area
+                checkAndRefillBlocks(); // Check and add new blocks if needed
             }
         }
 
@@ -157,11 +264,7 @@
                     if (shape[row][col] === 1) {
                         const cellX = gridX + col;
                         const cellY = gridY + row;
-                        if (
-                            cellX < 0 || cellX >= GRID_SIZE ||
-                            cellY < 0 || cellY >= GRID_SIZE ||
-                            gameGrid[cellY][cellX] !== 0
-                        ) {
+                        if (cellX < 0 || cellX >= gridSize || cellY < 0 || cellY >= gridSize || gridState[cellY][cellX] !== 0) {
                             return false;
                         }
                     }
@@ -174,90 +277,63 @@
             for (let row = 0; row < shape.length; row++) {
                 for (let col = 0; col < shape[row].length; col++) {
                     if (shape[row][col] === 1) {
-                        gameGrid[gridY + row][gridX + col] = 1;
+                        gridState[gridY + row][gridX + col] = 1;
                     }
                 }
             }
-            saveGameState();
-            renderGrid();
+            saveState("gridState", gridState);
+            createGrid();
         }
 
-        function resetBlockPosition(block) {
-            block.style.left = block.dataset.startX;
-            block.style.top = block.dataset.startY;
-        }
-
-        function onDragStart(event) {
-            const block = event.target.closest('.block');
-            const rect = block.getBoundingClientRect();
-            let offsetX, offsetY;
-
-            if (event.type === 'mousedown') {
-                offsetX = event.clientX - rect.left;
-                offsetY = event.clientY - rect.top;
-            } else if (event.type === 'touchstart') {
-                offsetX = event.touches[0].clientX - rect.left;
-                offsetY = event.touches[0].clientY - rect.top;
+        function checkAndRefillBlocks() {
+            if (currentBlocks.length < 3) {
+                const block = generateRandomBlock();
+                currentBlocks.push(block.pattern);
+                blocksContainer.appendChild(block.element);
+                saveState("currentBlocks", currentBlocks);
             }
-
-            block.dataset.startX = block.style.left || '0px';
-            block.dataset.startY = block.style.top || '0px';
-
-            const moveBlock = (e) => {
-                let x, y;
-                if (e.type === 'mousemove') {
-                    x = e.clientX - offsetX;
-                    y = e.clientY - offsetY;
-                } else if (e.type === 'touchmove') {
-                    x = e.touches[0].clientX - offsetX;
-                    y = e.touches[0].clientY - offsetY;
-                }
-
-                block.style.position = 'absolute';
-                block.style.zIndex = 1000;
-                block.style.left = `${x}px`;
-                block.style.top = `${y}px`;
-            };
-
-            const stopDragging = (e) => {
-                let x, y;
-                if (e.type === 'mouseup') {
-                    x = e.clientX;
-                    y = e.clientY;
-                } else if (e.type === 'touchend') {
-                    x = e.changedTouches[0].clientX;
-                    y = e.changedTouches[0].clientY;
-                }
-
-                document.removeEventListener('mousemove', moveBlock);
-                document.removeEventListener('mouseup', stopDragging);
-                document.removeEventListener('touchmove', moveBlock);
-                document.removeEventListener('touchend', stopDragging);
-
-                snapToGrid(block, x, y);
-            };
-
-            document.addEventListener('mousemove', moveBlock);
-            document.addEventListener('mouseup', stopDragging);
-            document.addEventListener('touchmove', moveBlock, { passive: false });
-            document.addEventListener('touchend', stopDragging);
         }
 
-        function saveGameState() {
-            localStorage.setItem('blockBlastGrid', JSON.stringify(gameGrid));
+        function getRandomBlockPattern() {
+            const patterns = [
+                [[1, 1, 1]],
+                [[1, 1], [1, 0]],
+                [[1, 1], [1, 1]],
+                [[1, 1, 1], [0, 1, 0]],
+            ];
+            return patterns[Math.floor(Math.random() * patterns.length)];
         }
 
-        function loadGameState() {
-            const savedGrid = localStorage.getItem('blockBlastGrid');
-            if (savedGrid) {
-                gameGrid = JSON.parse(savedGrid);
-            }
-            renderGrid();
+        function getRandomColor() {
+            const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"];
+            return colors[Math.floor(Math.random() * colors.length)];
         }
 
-        loadGameState();
-        renderGrid();
-        generateShapes();
+        function saveState(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function loadState(key) {
+            const state = localStorage.getItem(key);
+            return state ? JSON.parse(state) : null;
+        }
+
+        function resetGame() {
+            gridState = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+            currentBlocks = [];
+            score = 0;
+            saveState("gridState", gridState);
+            saveState("currentBlocks", currentBlocks);
+            saveState("score", score);
+            scoreDisplay.textContent = score;
+            createGrid();
+            createBlocks();
+        }
+
+        restartBtn.addEventListener("click", resetGame);
+
+        createGrid();
+        createBlocks();
     </script>
 </body>
 </html>
