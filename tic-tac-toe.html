@@ -239,7 +239,6 @@
   <a href="index" class="back-button">Back to Menu</a>
 
   <script>
-    // The JavaScript code remains unchanged
     const boardElement = document.getElementById("board");
     const resultElement = document.getElementById("result");
     const resetButton = document.getElementById("reset");
@@ -273,6 +272,7 @@
         cellElement.dataset.index = index;
         cellElement.textContent = cell;
         cellElement.addEventListener("click", handlePlayerMove);
+        cellElement.style.animationDelay = `${index * 0.05}s`;
         boardElement.appendChild(cellElement);
       });
     }
@@ -383,8 +383,10 @@
     }
 
     function showEndGameElements() {
-      resetButton.classList.add("show");
-      resultElement.classList.add("show");
+      setTimeout(() => {
+        resetButton.classList.add("show");
+        resultElement.classList.add("show");
+      }, 500);
     }
 
     resetButton.addEventListener("click", () => {
@@ -401,3 +403,4 @@
   </script>
 </body>
 </html>
+
