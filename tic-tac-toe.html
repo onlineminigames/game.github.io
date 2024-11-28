@@ -23,10 +23,10 @@
     }
 
     h1 {
-      font-size: 2.5em;
+      font-size: 2.8em;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
 
@@ -37,12 +37,13 @@
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 20px;
-      padding: 30px;
+      padding: 25px;
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
       max-width: 400px;
       width: 90%;
       margin-top: 10px;
       position: relative;
+      height: auto;
     }
 
     .scoreboard {
@@ -181,7 +182,7 @@
 
     @media (max-width: 600px) {
       h1 {
-        font-size: 2em;
+        font-size: 2.5em;
       }
 
       #board {
@@ -238,46 +239,104 @@
   <a href="index" class="back-button">Back to Menu</a>
 
   <script>
-    const board = document.getElementById("board");
-    const result = document.getElementById("result");
+    const boardElement = document.getElementById("board");
+    const resultElement = document.getElementById("result");
     const resetButton = document.getElementById("reset");
-    const winsCounter = document.getElementById("wins");
-    const drawsCounter = document.getElementById("draws");
-    const lossesCounter = document.getElementById("losses");
+    let boardState = Array(9).fill("");
+    const player = "X";
+    const robot = "O";
 
-    let currentPlayer = "X";
-    let gameActive = true;
-    let boardState = Array(9).fill(null);
-    let wins = 0, draws = 0, losses = 0;
+    let scores = JSON.parse(localStorage.getItem("tictactoe-scores")) || {
+      wins: 0,
+      losses: 0,
+      draws: 0,
+    };
+
+    let gameOver = false;
+
+    function updateScoreboard() {
+      document.getElementById("wins").textContent = scores.wins;
+      document.getElementById("losses").textContent = scores.losses;
+      document.getElementById("draws").textContent = scores.draws;
+    }
+
+    function saveScores() {
+      localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
+    }
 
     function createBoard() {
-      board.innerHTML = "";
+      boardElement.innerHTML = "";
       boardState.forEach((cell, index) => {
-        const cellDiv = document.createElement("div");
-        cellDiv.classList.add("cell");
-        cellDiv.dataset.index = index;
-        if (cell) cellDiv.textContent = cell;
-        cellDiv.addEventListener("click", handleCellClick);
-        board.appendChild(cellDiv);
+        const cellElement = document.createElement("div");
+        cellElement.className = "cell";
+        cellElement.dataset.index = index;
+        cellElement.textContent = cell;
+        cellElement.addEventListener("click", handlePlayerMove);
+        cellElement.style.animationDelay = `${index * 0.05}s`;
+        boardElement.appendChild(cellElement);
       });
     }
 
-    function handleCellClick(event) {
+    function handlePlayerMove(event) {
+      if (gameOver) return;
+
       const index = event.target.dataset.index;
 
-      if (boardState[index] || !gameActive) return;
+      if (boardState[index] !== "" || checkWinner() || isBoardFull()) return;
 
-      boardState[index] = currentPlayer;
-      event.target.textContent = currentPlayer;
+      boardState[index] = player;
+      createBoard();
+
+      if (checkWinner() || isBoardFull()) return;
+
+      robotMove();
+    }
+
+    function robotMove() {
+      if (gameOver) return;
+
+      const bestMove = getBestMove();
+      boardState[bestMove] = robot;
+      createBoard();
+
       checkWinner();
-      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      isBoardFull();
+    }
+
+    function getBestMove() {
+      const winningMoves = getWinningMove(robot);
+      if (winningMoves.length > 0) return winningMoves[0];
+
+      const blockingMoves = getWinningMove(player);
+      if (blockingMoves.length > 0) return blockingMoves[0];
+
+      const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
+      if (corners.length > 0) {
+        return corners[Math.floor(Math.random() * corners.length)];
+      }
+
+      const availableSpaces = boardState.map((value, index) => (value === "" ? index : null)).filter(value => value !== null);
+      return availableSpaces[Math.floor(Math.random() * availableSpaces.length)];
+    }
+
+    function getWinningMove(playerMark) {
+      const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6],
+      ];
+
+      return winningCombinations.filter(combination => {
+        const values = combination.map(index => boardState[index]);
+        return values.filter(value => value === playerMark).length === 2 && values.includes("");
+      }).map(combination => combination.find(index => boardState[index] === ""));
     }
 
     function checkWinner() {
       const winningCombinations = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],
         [0, 3, 6], [1, 4, 7], [2, 5, 8],
-        [0, 4, 8], [2, 4, 6]
+        [0, 4, 8], [2, 4, 6],
       ];
 
       let winner = null;
@@ -286,50 +345,61 @@
         const [a, b, c] = combination;
         if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
           winner = boardState[a];
-          document.querySelectorAll(".cell").forEach((cell, index) => {
-            if ([a, b, c].includes(index)) {
-              cell.classList.add(winner === "X" ? "win" : "lose");
+          combination.forEach(index => {
+            const cell = document.querySelector(`.cell[data-index="${index}"]`);
+            if (winner === player) {
+              cell.classList.add("win");
+            } else if (winner === robot) {
+              cell.classList.add("lose");
             }
           });
         }
       });
 
-      if (winner) {
-        gameActive = false;
-        result.textContent = winner === "X" ? "You Win!" : "You Lose!";
-        result.classList.add("show");
-        resetButton.classList.add("show");
-        winner === "X" ? wins++ : losses++;
-        updateScore();
-        return;
+      if (winner === player) {
+        resultElement.textContent = "You Win!";
+        scores.wins++;
+        gameOver = true;
+        showEndGameElements();
+      } else if (winner === robot) {
+        resultElement.textContent = "You Lose!";
+        scores.losses++;
+        gameOver = true;
+        showEndGameElements();
+      } else if (isBoardFull()) {
+        resultElement.textContent = "It's a Draw!";
+        scores.draws++;
+        gameOver = true;
+        showEndGameElements();
       }
 
-      if (!boardState.includes(null)) {
-        gameActive = false;
-        result.textContent = "It's a Draw!";
-        result.classList.add("show");
-        resetButton.classList.add("show");
-        draws++;
-        updateScore();
-      }
+      saveScores();
+      updateScoreboard();
+      return winner;
     }
 
-    function updateScore() {
-      winsCounter.textContent = wins;
-      drawsCounter.textContent = draws;
-      lossesCounter.textContent = losses;
+    function isBoardFull() {
+      return boardState.every(cell => cell !== "");
+    }
+
+    function showEndGameElements() {
+      setTimeout(() => {
+        resetButton.classList.add("show");
+        resultElement.classList.add("show");
+      }, 500);
     }
 
     resetButton.addEventListener("click", () => {
-      boardState = Array(9).fill(null);
-      gameActive = true;
-      currentPlayer = "X";
-      result.classList.remove("show");
+      resultElement.classList.remove("show");
       resetButton.classList.remove("show");
+      resultElement.textContent = "";
+      boardState = Array(9).fill("");
       createBoard();
+      gameOver = false;
     });
 
     createBoard();
+    updateScoreboard();
   </script>
 </body>
 </html>
