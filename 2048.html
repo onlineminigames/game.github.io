@@ -23,6 +23,7 @@
             border-radius: 8px;
             padding: 16px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative; /* Ensure the button is inside the container */
         }
 
         .header {
@@ -98,10 +99,11 @@
         }
 
         .new-game {
-            display: block;
-            width: 100%;
+            position: absolute; /* Position the button at the bottom of the container */
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
             padding: 16px;
-            margin-top: 16px;
             background-color: #8f7a66;
             color: #fff;
             font-size: 18px;
@@ -110,7 +112,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            z-index: 10; /* Ensures the button stays on top */
+            z-index: 10; /* Ensures the button is above the grid */
         }
 
         .new-game:hover {
