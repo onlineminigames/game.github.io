@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Block Puzzle Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background: #6200ea;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header p {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            grid-template-rows: repeat(10, 30px);
+            gap: 2px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            width: 320px;
+            height: 320px;
+        }
+
+        .grid-cell {
+            background: #fff;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+        }
+
+        #block-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .block {
+            display: grid;
+            grid-template-columns: repeat(3, 30px);
+            grid-template-rows: repeat(3, 30px);
+            gap: 2px;
+            cursor: grab;
+        }
+
+        .block-cell {
+            width: 30px;
+            height: 30px;
+            background: #6200ea;
+            border-radius: 5px;
+        }
+
+        footer {
+            background: #6200ea;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        footer button {
+            background: #ff6d00;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        footer button:hover {
+            background: #ff9e00;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Colorful Block Puzzle</h1>
+            <p>Score: <span id="score">0</span> | High Score: <span id="high-score">0</span></p>
+        </header>
+        <main>
+            <div id="grid"></div>
+            <div id="block-container"></div>
+        </main>
+        <footer>
+            <button id="restart-btn">Restart Game</button>
+        </footer>
+    </div>
+
+    <script>
+        const grid = document.getElementById("grid");
+        const blockContainer = document.getElementById("block-container");
+        const scoreElement = document.getElementById("score");
+        const highScoreElement = document.getElementById("high-score");
+        const restartBtn = document.getElementById("restart-btn");
+
+        const GRID_SIZE = 10;
+        let gridState = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(0));
+        let score = 0;
+        let highScore = localStorage.getItem("highScore") || 0;
+        highScoreElement.textContent = highScore;
+
+        function createGrid() {
+            grid.innerHTML = "";
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    const cell = document.createElement("div");
+                    cell.classList.add("grid-cell");
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function createBlocks() {
+            blockContainer.innerHTML = "";
+            for (let i = 0; i < 3; i++) {
+                const block = generateRandomBlock();
+                blockContainer.appendChild(block);
+            }
+        }
+
+        function generateRandomBlock() {
+            const block = document.createElement("div");
+            block.classList.add("block");
+
+            const pattern = getRandomBlockPattern();
+            pattern.forEach(row => {
+                row.forEach(cell => {
+                    const blockCell = document.createElement("div");
+                    blockCell.classList.add("block-cell");
+                    blockCell.style.backgroundColor = cell === 1 ? getRandomColor() : "transparent";
+                    block.appendChild(blockCell);
+                });
+            });
+
+            return block;
+        }
+
+        function getRandomBlockPattern() {
+            const patterns = [
+                [[1, 1, 1], [0, 0, 0], [0, 0, 0]],
+                [[1, 1], [1, 0]],
+                [[1, 1], [1, 1]],
+                [[1, 1, 1], [0, 1, 0]],
+            ];
+            return patterns[Math.floor(Math.random() * patterns.length)];
+        }
+
+        function getRandomColor() {
+            const colors = ["#f44336", "#2196f3", "#ffeb3b", "#4caf50", "#9c27b0"];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function updateScore(points) {
+            score += points;
+            scoreElement.textContent = score;
+            if (score > highScore) {
+                highScore = score;
+                highScoreElement.textContent = highScore;
+                localStorage.setItem("highScore", highScore);
+            }
+        }
+
+        function resetGame() {
+            gridState = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(0));
+            score = 0;
+            scoreElement.textContent = score;
+            createGrid();
+            createBlocks();
+        }
+
+        restartBtn.addEventListener("click", resetGame);
+
+        createGrid();
+        createBlocks();
+    </script>
+</body>
+</html>
