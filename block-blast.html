@@ -20,8 +20,8 @@
             flex-direction: column;
             align-items: center;
             gap: 20px;
-            width: 400px; /* Adjusted size */
-            height: 600px; /* Adjusted size */
+            width: 400px;
+            height: 600px;
             background: #1e293b;
             border-radius: 15px;
             padding: 20px;
@@ -29,7 +29,7 @@
         }
 
         #title {
-            font-size: 28px; /* Adjusted font size */
+            font-size: 28px;
             font-weight: bold;
             color: white;
             margin-bottom: 10px;
@@ -41,7 +41,7 @@
             justify-content: space-between;
             width: 100%;
             color: white;
-            font-size: 16px; /* Adjusted font size */
+            font-size: 16px;
         }
 
         #grid {
@@ -78,15 +78,15 @@
         }
 
         .block-cell {
-            width: 30px; /* Adjusted block size */
-            height: 30px; /* Adjusted block size */
+            width: 30px;
+            height: 30px;
             border-radius: 5px;
         }
 
         #restart-btn {
             background: #f59e0b;
             color: white;
-            font-size: 16px; /* Adjusted font size */
+            font-size: 16px;
             border: none;
             padding: 8px 15px;
             border-radius: 10px;
@@ -185,9 +185,39 @@
                 });
             });
 
-            block.draggable = true;
+            // Add drag-and-drop listeners
+            block.addEventListener("mousedown", onDragStart);
+            block.addEventListener("touchstart", onDragStart, { passive: false });
 
             return block;
+        }
+
+        function onDragStart(event) {
+            event.preventDefault();
+            let targetBlock = event.target.closest(".block");
+            let offsetX = event.clientX || event.touches[0].clientX;
+            let offsetY = event.clientY || event.touches[0].clientY;
+
+            const moveBlock = (e) => {
+                const x = e.clientX || e.touches[0].clientX;
+                const y = e.clientY || e.touches[0].clientY;
+                targetBlock.style.position = "absolute";
+                targetBlock.style.zIndex = 1000;
+                targetBlock.style.left = `${x - offsetX}px`;
+                targetBlock.style.top = `${y - offsetY}px`;
+            };
+
+            const stopDragging = () => {
+                document.removeEventListener("mousemove", moveBlock);
+                document.removeEventListener("mouseup", stopDragging);
+                document.removeEventListener("touchmove", moveBlock);
+                document.removeEventListener("touchend", stopDragging);
+            };
+
+            document.addEventListener("mousemove", moveBlock);
+            document.addEventListener("mouseup", stopDragging);
+            document.addEventListener("touchmove", moveBlock, { passive: false });
+            document.addEventListener("touchend", stopDragging);
         }
 
         function getRandomBlockPattern() {
