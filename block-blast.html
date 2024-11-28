@@ -20,8 +20,8 @@
             flex-direction: column;
             align-items: center;
             gap: 20px;
-            width: 500px;
-            height: 700px;
+            width: 400px; /* Adjusted size */
+            height: 600px; /* Adjusted size */
             background: #1e293b;
             border-radius: 15px;
             padding: 20px;
@@ -29,7 +29,7 @@
         }
 
         #title {
-            font-size: 32px;
+            font-size: 28px; /* Adjusted font size */
             font-weight: bold;
             color: white;
             margin-bottom: 10px;
@@ -41,7 +41,7 @@
             justify-content: space-between;
             width: 100%;
             color: white;
-            font-size: 18px;
+            font-size: 16px; /* Adjusted font size */
         }
 
         #grid {
@@ -66,7 +66,7 @@
         #blocks-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             width: 100%;
         }
 
@@ -74,20 +74,21 @@
             display: grid;
             gap: 2px;
             cursor: grab;
+            width: fit-content;
         }
 
         .block-cell {
-            width: 40px;
-            height: 40px;
+            width: 30px; /* Adjusted block size */
+            height: 30px; /* Adjusted block size */
             border-radius: 5px;
         }
 
         #restart-btn {
             background: #f59e0b;
             color: white;
-            font-size: 18px;
+            font-size: 16px; /* Adjusted font size */
             border: none;
-            padding: 10px 20px;
+            padding: 8px 15px;
             border-radius: 10px;
             cursor: pointer;
         }
@@ -172,8 +173,8 @@
             block.classList.add("block");
             const color = getRandomColor();
 
-            block.style.gridTemplateColumns = `repeat(${pattern[0].length}, 40px)`;
-            block.style.gridTemplateRows = `repeat(${pattern.length}, 40px)`;
+            block.style.gridTemplateColumns = `repeat(${pattern[0].length}, 1fr)`;
+            block.style.gridTemplateRows = `repeat(${pattern.length}, 1fr)`;
 
             pattern.forEach(row => {
                 row.forEach(cell => {
@@ -185,8 +186,6 @@
             });
 
             block.draggable = true;
-            block.addEventListener("dragstart", startDrag);
-            block.addEventListener("dragend", placeBlock);
 
             return block;
         }
