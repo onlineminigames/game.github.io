@@ -19,14 +19,14 @@
       align-items: center;
       justify-content: flex-start;
       min-height: 100vh;
-      padding-top: 20px;
+      padding-top: 10px;
     }
 
     h1 {
-      font-size: 3.5em;
+      font-size: 2.5em;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     }
 
@@ -41,9 +41,8 @@
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
       max-width: 400px;
       width: 90%;
-      margin-top: 20px;
+      margin-top: 10px;
       position: relative;
-      height: auto;
     }
 
     .scoreboard {
@@ -182,7 +181,7 @@
 
     @media (max-width: 600px) {
       h1 {
-        font-size: 2.5em;
+        font-size: 2em;
       }
 
       #board {
@@ -239,104 +238,46 @@
   <a href="index" class="back-button">Back to Menu</a>
 
   <script>
-    const boardElement = document.getElementById("board");
-    const resultElement = document.getElementById("result");
+    const board = document.getElementById("board");
+    const result = document.getElementById("result");
     const resetButton = document.getElementById("reset");
-    let boardState = Array(9).fill("");
-    const player = "X";
-    const robot = "O";
+    const winsCounter = document.getElementById("wins");
+    const drawsCounter = document.getElementById("draws");
+    const lossesCounter = document.getElementById("losses");
 
-    let scores = JSON.parse(localStorage.getItem("tictactoe-scores")) || {
-      wins: 0,
-      losses: 0,
-      draws: 0,
-    };
-
-    let gameOver = false;
-
-    function updateScoreboard() {
-      document.getElementById("wins").textContent = scores.wins;
-      document.getElementById("losses").textContent = scores.losses;
-      document.getElementById("draws").textContent = scores.draws;
-    }
-
-    function saveScores() {
-      localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
-    }
+    let currentPlayer = "X";
+    let gameActive = true;
+    let boardState = Array(9).fill(null);
+    let wins = 0, draws = 0, losses = 0;
 
     function createBoard() {
-      boardElement.innerHTML = "";
+      board.innerHTML = "";
       boardState.forEach((cell, index) => {
-        const cellElement = document.createElement("div");
-        cellElement.className = "cell";
-        cellElement.dataset.index = index;
-        cellElement.textContent = cell;
-        cellElement.addEventListener("click", handlePlayerMove);
-        cellElement.style.animationDelay = `${index * 0.05}s`;
-        boardElement.appendChild(cellElement);
+        const cellDiv = document.createElement("div");
+        cellDiv.classList.add("cell");
+        cellDiv.dataset.index = index;
+        if (cell) cellDiv.textContent = cell;
+        cellDiv.addEventListener("click", handleCellClick);
+        board.appendChild(cellDiv);
       });
     }
 
-    function handlePlayerMove(event) {
-      if (gameOver) return;
-
+    function handleCellClick(event) {
       const index = event.target.dataset.index;
 
-      if (boardState[index] !== "" || checkWinner() || isBoardFull()) return;
+      if (boardState[index] || !gameActive) return;
 
-      boardState[index] = player;
-      createBoard();
-
-      if (checkWinner() || isBoardFull()) return;
-
-      robotMove();
-    }
-
-    function robotMove() {
-      if (gameOver) return;
-
-      const bestMove = getBestMove();
-      boardState[bestMove] = robot;
-      createBoard();
-
+      boardState[index] = currentPlayer;
+      event.target.textContent = currentPlayer;
       checkWinner();
-      isBoardFull();
-    }
-
-    function getBestMove() {
-      const winningMoves = getWinningMove(robot);
-      if (winningMoves.length > 0) return winningMoves[0];
-
-      const blockingMoves = getWinningMove(player);
-      if (blockingMoves.length > 0) return blockingMoves[0];
-
-      const corners = [0, 2, 6, 8].filter(index => boardState[index] === "");
-      if (corners.length > 0) {
-        return corners[Math.floor(Math.random() * corners.length)];
-      }
-
-      const availableSpaces = boardState.map((value, index) => (value === "" ? index : null)).filter(value => value !== null);
-      return availableSpaces[Math.floor(Math.random() * availableSpaces.length)];
-    }
-
-    function getWinningMove(playerMark) {
-      const winningCombinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],
-        [0, 4, 8], [2, 4, 6],
-      ];
-
-      return winningCombinations.filter(combination => {
-        const values = combination.map(index => boardState[index]);
-        return values.filter(value => value === playerMark).length === 2 && values.includes("");
-      }).map(combination => combination.find(index => boardState[index] === ""));
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
     }
 
     function checkWinner() {
       const winningCombinations = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],
         [0, 3, 6], [1, 4, 7], [2, 5, 8],
-        [0, 4, 8], [2, 4, 6],
+        [0, 4, 8], [2, 4, 6]
       ];
 
       let winner = null;
@@ -345,62 +286,50 @@
         const [a, b, c] = combination;
         if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
           winner = boardState[a];
-          combination.forEach(index => {
-            const cell = document.querySelector(`.cell[data-index="${index}"]`);
-            if (winner === player) {
-              cell.classList.add("win");
-            } else if (winner === robot) {
-              cell.classList.add("lose");
+          document.querySelectorAll(".cell").forEach((cell, index) => {
+            if ([a, b, c].includes(index)) {
+              cell.classList.add(winner === "X" ? "win" : "lose");
             }
           });
         }
       });
 
-      if (winner === player) {
-        resultElement.textContent = "You Win!";
-        scores.wins++;
-        gameOver = true;
-        showEndGameElements();
-      } else if (winner === robot) {
-        resultElement.textContent = "You Lose!";
-        scores.losses++;
-        gameOver = true;
-        showEndGameElements();
-      } else if (isBoardFull()) {
-        resultElement.textContent = "It's a Draw!";
-        scores.draws++;
-        gameOver = true;
-        showEndGameElements();
+      if (winner) {
+        gameActive = false;
+        result.textContent = winner === "X" ? "You Win!" : "You Lose!";
+        result.classList.add("show");
+        resetButton.classList.add("show");
+        winner === "X" ? wins++ : losses++;
+        updateScore();
+        return;
       }
 
-      saveScores();
-      updateScoreboard();
-      return winner;
-    }
-
-    function isBoardFull() {
-      return boardState.every(cell => cell !== "");
-    }
-
-    function showEndGameElements() {
-      setTimeout(() => {
+      if (!boardState.includes(null)) {
+        gameActive = false;
+        result.textContent = "It's a Draw!";
+        result.classList.add("show");
         resetButton.classList.add("show");
-        resultElement.classList.add("show");
-      }, 500);
+        draws++;
+        updateScore();
+      }
+    }
+
+    function updateScore() {
+      winsCounter.textContent = wins;
+      drawsCounter.textContent = draws;
+      lossesCounter.textContent = losses;
     }
 
     resetButton.addEventListener("click", () => {
-      resultElement.classList.remove("show");
+      boardState = Array(9).fill(null);
+      gameActive = true;
+      currentPlayer = "X";
+      result.classList.remove("show");
       resetButton.classList.remove("show");
-      resultElement.textContent = "";
-      boardState = Array(9).fill("");
       createBoard();
-      gameOver = false;
     });
 
     createBoard();
-    updateScoreboard();
   </script>
 </body>
 </html>
-
