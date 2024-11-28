@@ -50,6 +50,7 @@
             opacity: 0;
             transform: scale(0.8);
             padding: 20px; /* Added padding to make the buttons larger */
+            animation: fadeInScale 0.5s ease forwards;
         }
 
         .game-button:hover {
@@ -113,13 +114,15 @@
             button.className = 'game-button';
             button.textContent = game.name;
             button.style.backgroundColor = game.color;
-            button.style.animationDelay = `${index * 0.1}s`;
-            button.style.animation = 'fadeInScale 0.5s ease forwards';
-            
+            // Set a delay for the animation based on the index
+            button.style.animationDelay = `${index * 0.2}s`; // Adjusted the delay for a smoother sequence
+
+            // Add click event for redirection to the game URL
             button.addEventListener('click', () => {
                 window.location.href = game.url;  // Redirect to the respective game page
             });
 
+            // Append the button to the game grid
             gameGrid.appendChild(button);
         });
     </script>
