@@ -107,7 +107,7 @@
             opacity: 0.5;
             z-index: 1000;
             position: absolute;
-            pointer-events: none; /* Avoid blocking grid interactions */
+            pointer-events: none;
             transition: none;
         }
 
@@ -286,14 +286,20 @@
             block.style.left = `${gridX * blockSize}px`;
             block.style.top = `${gridY * blockSize}px`;
 
-            // Update gridState
+            // Color the grid cells and mark them occupied
             for (let i = 0; i < pattern.length; i++) {
                 for (let j = 0; j < pattern[i].length; j++) {
                     if (pattern[i][j] === 1) {
                         gridState[gridY + i][gridX + j] = 1;
+                        const cell = grid.children[(gridY + i) * gridSize + (gridX + j)];
+                        cell.style.backgroundColor = block.style.backgroundColor;
                     }
                 }
             }
+
+            // Remove the block
+            block.remove();
+
             saveState("gridState", gridState);
             createGrid();
         }
