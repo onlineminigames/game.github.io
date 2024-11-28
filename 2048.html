@@ -267,9 +267,9 @@
             scoreElement.textContent = score;
             if (score > highScore) {
                 highScore = score;
-                highScoreElement.textContent = highScore;
                 localStorage.setItem('highScore', highScore);
             }
+            highScoreElement.textContent = highScore;
         }
 
         function isGameOver() {
@@ -324,10 +324,13 @@
             touchStartY = null;
         });
 
-        newGameButton.addEventListener('click', initializeGame);
+        newGameButton.addEventListener('click', () => {
+            initializeGame();
+            renderBoard();
+        });
 
-        highScoreElement.textContent = highScore;
         initializeGame();
     </script>
 </body>
 </html>
+
