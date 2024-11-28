@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Block Puzzle Game</title>
+    <title>Block Blast</title>
     <style>
         body {
             margin: 0;
@@ -26,6 +26,14 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
+        #title {
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
         #header {
             display: flex;
             justify-content: space-between;
@@ -43,6 +51,7 @@
             background: #111827;
             border: 2px solid #000;
             border-radius: 10px;
+            position: relative;
         }
 
         .grid-cell {
@@ -50,6 +59,16 @@
             height: 40px;
             background: #2d3748;
             border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .filled {
+            animation: fillFlash 0.5s ease-out;
+        }
+
+        @keyframes fillFlash {
+            0% { background-color: white; }
+            100% { background-color: #2d3748; }
         }
 
         #blocks-container {
@@ -62,7 +81,7 @@
         .block {
             display: grid;
             gap: 2px;
-            cursor: pointer;
+            cursor: grab;
         }
 
         .block-cell {
@@ -93,6 +112,7 @@
 </head>
 <body>
     <div id="game-container">
+        <div id="title">Block Blast</div>
         <div id="header">
             <div>🏆 <span id="high-score" class="gold">0</span></div>
             <div id="score">0</div>
@@ -114,6 +134,7 @@
         let score = 0;
         let highScore = localStorage.getItem("blockGameHighScore") || 0;
         highScoreDisplay.textContent = highScore;
+        let draggingBlock = null;
 
         function createGrid() {
             grid.innerHTML = "";
@@ -152,10 +173,10 @@
                 });
             });
 
-            block.addEventListener("click", () => {
-                // Block placement logic will go here
-                updateScore(10);
-            });
+            block.addEventListener("mousedown", startDrag);
+            block.addEventListener("touchstart", startDrag);
+            block.addEventListener("mouseup", placeBlock);
+            block.addEventListener("touchend", placeBlock);
 
             return block;
         }
@@ -184,6 +205,28 @@
                 highScoreDisplay.textContent = highScore;
                 localStorage.setItem("blockGameHighScore", highScore);
             }
+        }
+
+        function clearRowsAndColumns() {
+            let clearedRows = 0;
+
+            // Check rows
+            for (let row = 0; row < gridSize; row++) {
+                if (gridState[row].every(cell => cell === 1)) {
+                    gridState[row].fill(0);
+                    clearedRows++;
+                }
+            }
+
+            // Check columns
+            for (let col = 0; col < gridSize; col++) {
+                if (gridState.every(row => row[col] === 1)) {
+                    gridState.forEach(row => row[col] = 0);
+                    clearedRows++;
+                }
+            }
+
+            return clearedRows;
         }
 
         function resetGame() {
