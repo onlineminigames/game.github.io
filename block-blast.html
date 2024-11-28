@@ -54,6 +54,7 @@
             background: #111827;
             border: 2px solid #000;
             border-radius: 10px;
+            position: relative;
         }
 
         .grid-cell {
@@ -101,6 +102,13 @@
             color: #ffd700;
             font-weight: bold;
         }
+
+        .dragging {
+            opacity: 0.5;
+            z-index: 100;
+            transition: all 0.2s ease-in-out;
+        }
+
     </style>
 </head>
 <body>
@@ -116,7 +124,11 @@
     </div>
 
     <script>
-        const gridSize = 8;
+        // Constants
+        const gridSize = 8; // Grid size (8x8)
+        const blockSize = 30; // Size of each block (30x30)
+        const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"];
+
         const grid = document.getElementById("grid");
         const blocksContainer = document.getElementById("blocks-container");
         const scoreDisplay = document.getElementById("score");
@@ -131,6 +143,7 @@
         highScoreDisplay.textContent = highScore;
         scoreDisplay.textContent = score;
 
+        // Create grid
         function createGrid() {
             grid.innerHTML = "";
             for (let row = 0; row < gridSize; row++) {
@@ -145,6 +158,7 @@
             }
         }
 
+        // Create blocks
         function createBlocks() {
             blocksContainer.innerHTML = "";
             if (currentBlocks.length === 0) {
@@ -162,12 +176,14 @@
             }
         }
 
+        // Generate random block
         function generateRandomBlock() {
             const pattern = getRandomBlockPattern();
             const element = createBlockElement(pattern);
             return { pattern, element };
         }
 
+        // Create block element
         function createBlockElement(pattern) {
             const block = document.createElement("div");
             block.classList.add("block");
@@ -192,12 +208,15 @@
             return block;
         }
 
+        // On drag start
         function onDragStart(event) {
             event.preventDefault();
             const targetBlock = event.target.closest(".block");
+            targetBlock.classList.add("dragging");
+
             const rect = targetBlock.getBoundingClientRect();
             let offsetX, offsetY;
-        
+
             if (event.type === "mousedown") {
                 offsetX = event.clientX - rect.left;
                 offsetY = event.clientY - rect.top;
@@ -205,10 +224,9 @@
                 offsetX = event.touches[0].clientX - rect.left;
                 offsetY = event.touches[0].clientY - rect.top;
             }
-        
+
             const moveBlock = (e) => {
                 let x, y;
-        
                 if (e.type === "mousemove") {
                     x = e.clientX - offsetX;
                     y = e.clientY - offsetY;
@@ -216,55 +234,62 @@
                     x = e.touches[0].clientX - offsetX;
                     y = e.touches[0].clientY - offsetY;
                 }
-        
+
                 targetBlock.style.position = "absolute";
                 targetBlock.style.zIndex = 1000;
                 targetBlock.style.left = `${x}px`;
                 targetBlock.style.top = `${y}px`;
             };
-        
+
             const stopDragging = () => {
                 document.removeEventListener("mousemove", moveBlock);
                 document.removeEventListener("mouseup", stopDragging);
                 document.removeEventListener("touchmove", moveBlock);
                 document.removeEventListener("touchend", stopDragging);
-        
-                // Reset the block's z-index after dragging stops
-                targetBlock.style.zIndex = "";
-                
+
                 // Snap to grid logic
                 const x = parseInt(targetBlock.style.left);
                 const y = parseInt(targetBlock.style.top);
 
                 snapToGrid(targetBlock, x, y);
+                targetBlock.classList.remove("dragging");
             };
-        
+
             document.addEventListener("mousemove", moveBlock);
             document.addEventListener("mouseup", stopDragging);
             document.addEventListener("touchmove", moveBlock, { passive: false });
             document.addEventListener("touchend", stopDragging);
         }
 
+        // Snap the block to the grid
         function snapToGrid(block, x, y) {
-            const gridX = Math.floor(x / 40);  // Adjust the grid size
-            const gridY = Math.floor(y / 40);  // Adjust the grid size
+            const gridX = Math.floor(x / blockSize); // Adjust for block size
+            const gridY = Math.floor(y / blockSize); // Adjust for block size
+
             const blockPattern = block.dataset.shape.split(",").map(row => row.split("").map(Number));
 
-            // Check if it fits the grid and place it
             if (canPlaceShape(gridX, gridY, blockPattern)) {
                 placeShape(gridX, gridY, blockPattern);
-                block.remove(); // Remove block from the blocks area
-                checkAndRefillBlocks(); // Check and add new blocks if needed
+                block.style.transition = "all 0.3s ease-in-out";
+                block.style.left = `${gridX * blockSize}px`;
+                block.style.top = `${gridY * blockSize}px`;
+
+                // Disable further movement after snapping
+                block.removeEventListener("mousedown", onDragStart);
+                block.removeEventListener("touchstart", onDragStart);
             }
         }
 
-        function canPlaceShape(gridX, gridY, shape) {
-            for (let row = 0; row < shape.length; row++) {
-                for (let col = 0; col < shape[row].length; col++) {
-                    if (shape[row][col] === 1) {
-                        const cellX = gridX + col;
-                        const cellY = gridY + row;
-                        if (cellX < 0 || cellX >= gridSize || cellY < 0 || cellY >= gridSize || gridState[cellY][cellX] !== 0) {
+        // Can place the shape on the grid
+        function canPlaceShape(gridX, gridY, pattern) {
+            for (let row = 0; row < pattern.length; row++) {
+                for (let col = 0; col < pattern[row].length; col++) {
+                    if (pattern[row][col] === 1) {
+                        if (
+                            gridX + col < 0 || gridX + col >= gridSize ||
+                            gridY + row < 0 || gridY + row >= gridSize ||
+                            gridState[gridY + row][gridX + col] === 1
+                        ) {
                             return false;
                         }
                     }
@@ -273,10 +298,11 @@
             return true;
         }
 
-        function placeShape(gridX, gridY, shape) {
-            for (let row = 0; row < shape.length; row++) {
-                for (let col = 0; col < shape[row].length; col++) {
-                    if (shape[row][col] === 1) {
+        // Place the shape on the grid
+        function placeShape(gridX, gridY, pattern) {
+            for (let row = 0; row < pattern.length; row++) {
+                for (let col = 0; col < pattern[row].length; col++) {
+                    if (pattern[row][col] === 1) {
                         gridState[gridY + row][gridX + col] = 1;
                     }
                 }
@@ -285,15 +311,7 @@
             createGrid();
         }
 
-        function checkAndRefillBlocks() {
-            if (currentBlocks.length < 3) {
-                const block = generateRandomBlock();
-                currentBlocks.push(block.pattern);
-                blocksContainer.appendChild(block.element);
-                saveState("currentBlocks", currentBlocks);
-            }
-        }
-
+        // Get random block pattern
         function getRandomBlockPattern() {
             const patterns = [
                 [[1, 1, 1]],
@@ -304,20 +322,23 @@
             return patterns[Math.floor(Math.random() * patterns.length)];
         }
 
+        // Get random color
         function getRandomColor() {
-            const colors = ["#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#8b5cf6"];
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
+        // Save game state
         function saveState(key, value) {
             localStorage.setItem(key, JSON.stringify(value));
         }
 
+        // Load game state
         function loadState(key) {
             const state = localStorage.getItem(key);
             return state ? JSON.parse(state) : null;
         }
 
+        // Reset game
         function resetGame() {
             gridState = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
             currentBlocks = [];
