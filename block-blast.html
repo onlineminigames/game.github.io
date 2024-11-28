@@ -105,8 +105,10 @@
 
         .dragging {
             opacity: 0.5;
-            z-index: 100;
-            transition: all 0.2s ease-in-out;
+            z-index: 1000;
+            position: absolute;
+            pointer-events: none; /* Avoid blocking grid interactions */
+            transition: none;
         }
 
     </style>
@@ -225,6 +227,8 @@
                 offsetY = event.touches[0].clientY - rect.top;
             }
 
+            const originalPosition = { x: rect.left, y: rect.top };
+
             const moveBlock = (e) => {
                 let x, y;
                 if (e.type === "mousemove") {
@@ -235,8 +239,6 @@
                     y = e.touches[0].clientY - offsetY;
                 }
 
-                targetBlock.style.position = "absolute";
-                targetBlock.style.zIndex = 1000;
                 targetBlock.style.left = `${x}px`;
                 targetBlock.style.top = `${y}px`;
             };
@@ -247,11 +249,21 @@
                 document.removeEventListener("touchmove", moveBlock);
                 document.removeEventListener("touchend", stopDragging);
 
-                // Snap to grid logic
+                // Snap to grid logic or slide back if outside grid
                 const x = parseInt(targetBlock.style.left);
                 const y = parseInt(targetBlock.style.top);
 
-                snapToGrid(targetBlock, x, y);
+                const gridX = Math.floor(x / blockSize);
+                const gridY = Math.floor(y / blockSize);
+
+                const blockPattern = targetBlock.dataset.shape.split(",").map(row => row.split("").map(Number));
+
+                if (isValidSnap(gridX, gridY, blockPattern)) {
+                    snapToGrid(targetBlock, gridX, gridY, blockPattern);
+                } else {
+                    slideBack(targetBlock, originalPosition);
+                }
+
                 targetBlock.classList.remove("dragging");
             };
 
@@ -261,54 +273,41 @@
             document.addEventListener("touchend", stopDragging);
         }
 
+        // Check if the block can snap
+        function isValidSnap(x, y, pattern) {
+            return pattern.every((row, i) => row.every((cell, j) => {
+                return (cell === 0 || (x + j >= 0 && x + j < gridSize && y + i >= 0 && y + i < gridSize && gridState[y + i][x + j] === 0));
+            }));
+        }
+
         // Snap the block to the grid
-        function snapToGrid(block, x, y) {
-            const gridX = Math.floor(x / blockSize); // Adjust for block size
-            const gridY = Math.floor(y / blockSize); // Adjust for block size
+        function snapToGrid(block, gridX, gridY, pattern) {
+            block.style.transition = "all 0.3s ease-in-out";
+            block.style.left = `${gridX * blockSize}px`;
+            block.style.top = `${gridY * blockSize}px`;
 
-            const blockPattern = block.dataset.shape.split(",").map(row => row.split("").map(Number));
-
-            if (canPlaceShape(gridX, gridY, blockPattern)) {
-                placeShape(gridX, gridY, blockPattern);
-                block.style.transition = "all 0.3s ease-in-out";
-                block.style.left = `${gridX * blockSize}px`;
-                block.style.top = `${gridY * blockSize}px`;
-
-                // Disable further movement after snapping
-                block.removeEventListener("mousedown", onDragStart);
-                block.removeEventListener("touchstart", onDragStart);
-            }
-        }
-
-        // Can place the shape on the grid
-        function canPlaceShape(gridX, gridY, pattern) {
-            for (let row = 0; row < pattern.length; row++) {
-                for (let col = 0; col < pattern[row].length; col++) {
-                    if (pattern[row][col] === 1) {
-                        if (
-                            gridX + col < 0 || gridX + col >= gridSize ||
-                            gridY + row < 0 || gridY + row >= gridSize ||
-                            gridState[gridY + row][gridX + col] === 1
-                        ) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-
-        // Place the shape on the grid
-        function placeShape(gridX, gridY, pattern) {
-            for (let row = 0; row < pattern.length; row++) {
-                for (let col = 0; col < pattern[row].length; col++) {
-                    if (pattern[row][col] === 1) {
-                        gridState[gridY + row][gridX + col] = 1;
+            // Update gridState
+            for (let i = 0; i < pattern.length; i++) {
+                for (let j = 0; j < pattern[i].length; j++) {
+                    if (pattern[i][j] === 1) {
+                        gridState[gridY + i][gridX + j] = 1;
                     }
                 }
             }
             saveState("gridState", gridState);
             createGrid();
+        }
+
+        // Slide the block back to the original position
+        function slideBack(block, originalPosition) {
+            block.style.transition = "all 0.3s ease-in-out";
+            block.style.left = `${originalPosition.x}px`;
+            block.style.top = `${originalPosition.y}px`;
+        }
+
+        // Get random color
+        function getRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
         }
 
         // Get random block pattern
@@ -320,11 +319,6 @@
                 [[1, 1, 1], [0, 1, 0]],
             ];
             return patterns[Math.floor(Math.random() * patterns.length)];
-        }
-
-        // Get random color
-        function getRandomColor() {
-            return colors[Math.floor(Math.random() * colors.length)];
         }
 
         // Save game state
