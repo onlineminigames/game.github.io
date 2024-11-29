@@ -188,6 +188,8 @@
     }
 
     .cell {
+      opacity: 0;
+      transform: scale(0.5);
       animation: fadeInCells 0.5s ease-out forwards;
     }
     
@@ -195,6 +197,26 @@
       animation: fadeOutCells 0.5s ease-out forwards;
     }
 
+    .cell:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+    
+    .cell:nth-child(2), .cell:nth-child(4) {
+      animation-delay: 0.2s;
+    }
+    
+    .cell:nth-child(3), .cell:nth-child(5), .cell:nth-child(7) {
+      animation-delay: 0.3s;
+    }
+    
+    .cell:nth-child(6), .cell:nth-child(8) {
+      animation-delay: 0.4s;
+    }
+    
+    .cell:nth-child(9) {
+      animation-delay: 0.5s;
+    }
+    
     .cell:hover {
       background: rgba(255, 255, 255, 0.2);
       transform: scale(1.05);
@@ -397,15 +419,15 @@
       boardElement.innerHTML = "";
       boardState.forEach((cell, index) => {
         const cellElement = document.createElement("div");
-        cellElement.classList.add("cell");
-        if (cell !== "") {
-          cellElement.textContent = cell;
-        }
-        cellElement.addEventListener("click", () => handleMove(index));
-        cellElement.classList.add("initial-anim"); // Add animation class
+        cellElement.className = "cell";
+        cellElement.dataset.index = index;
+        cellElement.textContent = cell;
+        cellElement.style.animationDelay = `${index * 0.05}s`;
+        cellElement.addEventListener("click", handlePlayerMove);  // Ensure click is active
         boardElement.appendChild(cellElement);
       });
     }
+
 
     function handlePlayerMove(event) {
       if (gameOver) return;
@@ -533,7 +555,7 @@
         boardState = Array(9).fill("");
         createBoard();  // Recreate the board after cells disappear
         gameOver = false;
-      }, 500); // Time matches the animation duration (500ms)
+      }, 500); // Match the duration of the disappearance animation
     });
 
     createBoard();
