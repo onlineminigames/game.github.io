@@ -11,6 +11,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            height: 100vh;
         }
 
         canvas {
@@ -19,7 +20,7 @@
             background-color: #70c5ce;
         }
 
-        .game-over, .start-screen {
+        .game-over {
             display: none;
             position: absolute;
             top: 50%;
@@ -31,7 +32,7 @@
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
         }
 
-        .start-screen button, .game-over button {
+        .game-over button {
             background-color: #ffcc00;
             border: none;
             padding: 15px 30px;
@@ -43,7 +44,7 @@
             transition: all 0.3s ease;
         }
 
-        .start-screen button:hover, .game-over button:hover {
+        .game-over button:hover {
             background-color: #ff9900;
             transform: scale(1.1);
         }
@@ -61,11 +62,6 @@
 </head>
 <body>
 
-<div class="start-screen">
-    <h1>Flappy Bird</h1>
-    <button onclick="startGame()">Start Game</button>
-</div>
-
 <div class="game-over">
     <h1>Game Over</h1>
     <p>Score: <span id="final-score">0</span></p>
@@ -82,11 +78,9 @@
     let isGameOver = false;
     const birdWidth = 30, birdHeight = 30, pipeWidth = 50;
 
-    const startScreen = document.querySelector(".start-screen");
     const gameOverScreen = document.querySelector(".game-over");
 
     function startGame() {
-        startScreen.style.display = "none";
         gameOverScreen.style.display = "none";
         isGameOver = false;
         bird = new Bird();
@@ -170,13 +164,19 @@
         document.getElementById("final-score").textContent = score;
     }
 
-    window.addEventListener("keydown", function(e) {
-        if (e.key === " " || e.key === "ArrowUp") {
-            bird.flap();
+    window.addEventListener("click", function() {
+        if (isGameOver) {
+            startGame();  // Restart the game when clicked on game over screen
+        } else {
+            bird.flap(); // Flap the bird upwards on screen click/touch
+            if (score === 0) {
+                startGame(); // Start the game after the first click
+            }
         }
     });
 
-    startScreen.style.display = "block"; // Show the start screen when the page loads
+    startGame(); // Automatically start the game when the page loads
+
 </script>
 
 </body>
