@@ -138,6 +138,34 @@
       animation: fadeIn 1s ease-out forwards;
     }
 
+    /* Initial board animation only */
+    .board-animation .cell {
+      opacity: 0;
+      transform: scale(0.5);
+      animation: fadeInCells 0.5s ease-out forwards;
+    }
+    
+    .board-animation .cell:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+    
+    .board-animation .cell:nth-child(2), .board-animation .cell:nth-child(4) {
+      animation-delay: 0.2s;
+    }
+    
+    .board-animation .cell:nth-child(3), .board-animation .cell:nth-child(5), .board-animation .cell:nth-child(7) {
+      animation-delay: 0.3s;
+    }
+    
+    .board-animation .cell:nth-child(6), .board-animation .cell:nth-child(8) {
+      animation-delay: 0.4s;
+    }
+    
+    .board-animation .cell:nth-child(9) {
+      animation-delay: 0.5s;
+    }
+
+
     .cell {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 15px;
@@ -416,16 +444,24 @@
     }
 
     function createBoard() {
-      boardElement.innerHTML = "";
+      boardElement.innerHTML = "";  // Clear the board content
       boardState.forEach((cell, index) => {
         const cellElement = document.createElement("div");
         cellElement.className = "cell";
         cellElement.dataset.index = index;
         cellElement.textContent = cell;
         cellElement.style.animationDelay = `${index * 0.05}s`;
-        cellElement.addEventListener("click", handlePlayerMove);  // Ensure click is active
+        cellElement.addEventListener("click", handlePlayerMove);  // Re-enable click handling
         boardElement.appendChild(cellElement);
       });
+    
+      // Add the animation class to the board
+      boardElement.classList.add("board-animation");
+    
+      // Remove the animation class after the animation is done
+      setTimeout(() => {
+        boardElement.classList.remove("board-animation");
+      }, 600);  // Match the duration of the longest animation (0.5s + delay)
     }
 
 
@@ -542,7 +578,7 @@
     }
 
     resetButton.addEventListener("click", () => {
-      // Animate old cells disappearing
+      // Animate old cells disappearing (only when resetting)
       document.querySelectorAll('.cell').forEach(cell => {
         cell.classList.add('disappearing');
       });
@@ -552,11 +588,12 @@
         resultElement.classList.remove("show");
         resetButton.classList.remove("show");
         resultElement.textContent = "";
-        boardState = Array(9).fill("");
-        createBoard();  // Recreate the board after cells disappear
+        boardState = Array(9).fill("");  // Reset the board state
+        createBoard();  // Recreate the board with initial animation
         gameOver = false;
-      }, 500); // Match the duration of the disappearance animation
+      }, 500);  // Wait for disappearing animation to finish
     });
+
 
     createBoard();
     updateScoreboard();
