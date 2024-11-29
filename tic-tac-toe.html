@@ -20,7 +20,6 @@
       justify-content: flex-start;
       min-height: 100vh;
       padding-top: 10px;
-      overflow-x: hidden;
     }
 
     h1 {
@@ -29,31 +28,8 @@
       color: #fff;
       margin-bottom: 10px;
       text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-      animation: fadeIn 1s ease-out forwards;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInScale {
-      0% {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    
     #game-container {
       display: flex;
       flex-direction: column;
@@ -65,27 +41,17 @@
       box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
       max-width: 400px;
       width: 90%;
-      height: auto;
-      overflow: hidden;
+      height: 850px;
       margin-top: 5px;
       position: relative;
-      animation: fadeInUp 1s ease-out forwards;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      height: auto;
+      overflow: hidden;
     }
 
     .scoreboard {
       font-size: 1.2em;
       margin-bottom: 25px;
+      margin-top: 1px;
       color: #fff;
       background: rgba(255, 255, 255, 0.1);
       padding: 15px;
@@ -94,27 +60,12 @@
       justify-content: space-between;
       width: 100%;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 0.8s ease-out forwards;
     }
 
-    .scoreboard, #board, #reset, #result {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInScale 1s ease-out forwards;
+    .scoreboard p {
+      margin: 0;
     }
 
-    .scoreboard {
-      animation-delay: 0.2s;
-    }
-    
-    #board {
-      animation-delay: 0.4s;
-    }
-    
-    #result, #reset {
-      animation-delay: 0.6s;
-    }
-    
     .score-item {
       text-align: center;
       flex: 1;
@@ -135,36 +86,7 @@
       width: 100%;
       max-width: 350px;
       margin-bottom: 110px;
-      animation: fadeIn 1s ease-out forwards;
     }
-
-    /* Initial board animation only */
-    .board-animation .cell {
-      opacity: 0;
-      transform: scale(0.5);
-      animation: fadeInCells 0.5s ease-out forwards;
-    }
-    
-    .board-animation .cell:nth-child(1) {
-      animation-delay: 0.1s;
-    }
-    
-    .board-animation .cell:nth-child(2), .board-animation .cell:nth-child(4) {
-      animation-delay: 0.2s;
-    }
-    
-    .board-animation .cell:nth-child(3), .board-animation .cell:nth-child(5), .board-animation .cell:nth-child(7) {
-      animation-delay: 0.3s;
-    }
-    
-    .board-animation .cell:nth-child(6), .board-animation .cell:nth-child(8) {
-      animation-delay: 0.4s;
-    }
-    
-    .board-animation .cell:nth-child(9) {
-      animation-delay: 0.5s;
-    }
-
 
     .cell {
       background: rgba(255, 255, 255, 0.1);
@@ -177,133 +99,18 @@
       line-height: 100px;
       height: 100px;
       cursor: pointer;
-      opacity: 0;
-      transform: scale(0.8);
-      animation: cellEntry 0.3s ease-out forwards;
+      transition: all 0.3s ease;
     }
 
-    @keyframes cellEntry {
-      from {
-        opacity: 0;
-        transform: scale(0.5);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes fadeOutCells {
-      0% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: scale(0.5);
-      }
-    }
-    
-    @keyframes fadeInCells {
-      0% {
-        opacity: 0;
-        transform: scale(0.5);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .cell {
-      opacity: 0;
-      transform: scale(0.5);
-      animation: fadeInCells 0.5s ease-out forwards;
-    }
-    
-    .cell.disappearing {
-      animation: fadeOutCells 0.5s ease-out forwards;
-    }
-
-    .cell:nth-child(1) {
-      animation-delay: 0.1s;
-    }
-    
-    .cell:nth-child(2), .cell:nth-child(4) {
-      animation-delay: 0.2s;
-    }
-    
-    .cell:nth-child(3), .cell:nth-child(5), .cell:nth-child(7) {
-      animation-delay: 0.3s;
-    }
-    
-    .cell:nth-child(6), .cell:nth-child(8) {
-      animation-delay: 0.4s;
-    }
-    
-    .cell:nth-child(9) {
-      animation-delay: 0.5s;
-    }
-
-
-    /* Animation for the cells only when first loading */
-    .board-animation .cell {
-      opacity: 0;
-      transform: scale(0.5);
-      animation: fadeInCells 0.5s ease-out forwards;
-    }
-    
-    .board-animation .cell:nth-child(1) {
-      animation-delay: 0.1s;
-    }
-    
-    .board-animation .cell:nth-child(2), .board-animation .cell:nth-child(4) {
-      animation-delay: 0.2s;
-    }
-    
-    .board-animation .cell:nth-child(3), .board-animation .cell:nth-child(5), .board-animation .cell:nth-child(7) {
-      animation-delay: 0.3s;
-    }
-    
-    .board-animation .cell:nth-child(6), .board-animation .cell:nth-child(8) {
-      animation-delay: 0.4s;
-    }
-    
-    .board-animation .cell:nth-child(9) {
-      animation-delay: 0.5s;
-    }
-    
-    /* Optional: Add some styles for disappearing cells if needed */
-    .cell.disappearing {
-      opacity: 0;
-      transform: scale(0.5);
-      transition: all 0.3s ease-out;
-    }
-
-
-    
     .cell:hover {
       background: rgba(255, 255, 255, 0.2);
       transform: scale(1.05);
-      transition: all 0.3s ease;
     }
 
     .cell.win {
       background: linear-gradient(135deg, #00c853, #b9f6ca);
       color: #fff;
       box-shadow: 0 4px 10px rgba(0, 200, 83, 0.5);
-      animation: pulseWin 1s infinite;
-    }
-
-    @keyframes pulseWin {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 4px 10px rgba(0, 200, 83, 0.5);
-      }
-      50% {
-        transform: scale(1.1);
-        box-shadow: 0 6px 15px rgba(0, 200, 83, 0.7);
-      }
     }
 
     .cell.lose {
@@ -323,7 +130,6 @@
       visibility: hidden;
       transform: translateY(20px);
       transition: all 0.5s ease;
-      animation: fadeIn 1s ease-out forwards;
     }
 
     #result.show {
@@ -414,20 +220,6 @@
         font-size: 1em;
         padding: 10px 20px;
       }
-      .cell.initial-anim {
-        animation: cellAnimation 0.5s ease-out;
-      }
-      
-      @keyframes cellAnimation {
-        0% {
-          transform: scale(0);
-          opacity: 0;
-        }
-        100% {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
     }
   </style>
 </head>
@@ -480,42 +272,18 @@
       localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
     }
 
-    let isFirstLoad = true;  // Flag to track if it's the first load of the game
-    
     function createBoard() {
-      boardElement.innerHTML = "";  // Clear the board content
+      boardElement.innerHTML = "";
       boardState.forEach((cell, index) => {
         const cellElement = document.createElement("div");
         cellElement.className = "cell";
         cellElement.dataset.index = index;
         cellElement.textContent = cell;
+        cellElement.addEventListener("click", handlePlayerMove);
         cellElement.style.animationDelay = `${index * 0.05}s`;
-        cellElement.addEventListener("click", handlePlayerMove);  // Re-enable click handling
         boardElement.appendChild(cellElement);
       });
-    
-      // Add the animation class to the board only on the first load
-      if (isFirstLoad) {
-        boardElement.classList.add("board-animation");
-        isFirstLoad = false;  // Set the flag to false after the first load
-      }
-    
-      // Remove the animation class after the animation is done
-      setTimeout(() => {
-        boardElement.classList.remove("board-animation");
-      }, 600);  // Match the duration of the longest animation (0.5s + delay)
     }
-
-    
-      // Add the animation class to the board
-      boardElement.classList.add("board-animation");
-    
-      // Remove the animation class after the animation is done
-      setTimeout(() => {
-        boardElement.classList.remove("board-animation");
-      }, 600);  // Match the duration of the longest animation (0.5s + delay)
-    }
-
 
     function handlePlayerMove(event) {
       if (gameOver) return;
@@ -630,23 +398,13 @@
     }
 
     resetButton.addEventListener("click", () => {
-      // Animate old cells disappearing (only when resetting)
-      document.querySelectorAll('.cell').forEach(cell => {
-        cell.classList.add('disappearing');
-      });
-    
-      // Wait for the animation to finish before resetting the board
-      setTimeout(() => {
-        resultElement.classList.remove("show");
-        resetButton.classList.remove("show");
-        resultElement.textContent = "";
-        boardState = Array(9).fill("");  // Reset the board state
-        createBoard();  // Recreate the board with initial animation
-        gameOver = false;
-      }, 500);  // Wait for disappearing animation to finish
+      resultElement.classList.remove("show");
+      resetButton.classList.remove("show");
+      resultElement.textContent = "";
+      boardState = Array(9).fill("");
+      createBoard();
+      gameOver = false;
     });
-
-
 
     createBoard();
     updateScoreboard();
