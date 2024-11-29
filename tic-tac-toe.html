@@ -244,6 +244,43 @@
     .cell:nth-child(9) {
       animation-delay: 0.5s;
     }
+
+
+    /* Animation for the cells only when first loading */
+    .board-animation .cell {
+      opacity: 0;
+      transform: scale(0.5);
+      animation: fadeInCells 0.5s ease-out forwards;
+    }
+    
+    .board-animation .cell:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+    
+    .board-animation .cell:nth-child(2), .board-animation .cell:nth-child(4) {
+      animation-delay: 0.2s;
+    }
+    
+    .board-animation .cell:nth-child(3), .board-animation .cell:nth-child(5), .board-animation .cell:nth-child(7) {
+      animation-delay: 0.3s;
+    }
+    
+    .board-animation .cell:nth-child(6), .board-animation .cell:nth-child(8) {
+      animation-delay: 0.4s;
+    }
+    
+    .board-animation .cell:nth-child(9) {
+      animation-delay: 0.5s;
+    }
+    
+    /* Optional: Add some styles for disappearing cells if needed */
+    .cell.disappearing {
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.3s ease-out;
+    }
+
+
     
     .cell:hover {
       background: rgba(255, 255, 255, 0.2);
@@ -443,6 +480,8 @@
       localStorage.setItem("tictactoe-scores", JSON.stringify(scores));
     }
 
+    let isFirstLoad = true;  // Flag to track if it's the first load of the game
+    
     function createBoard() {
       boardElement.innerHTML = "";  // Clear the board content
       boardState.forEach((cell, index) => {
@@ -454,6 +493,19 @@
         cellElement.addEventListener("click", handlePlayerMove);  // Re-enable click handling
         boardElement.appendChild(cellElement);
       });
+    
+      // Add the animation class to the board only on the first load
+      if (isFirstLoad) {
+        boardElement.classList.add("board-animation");
+        isFirstLoad = false;  // Set the flag to false after the first load
+      }
+    
+      // Remove the animation class after the animation is done
+      setTimeout(() => {
+        boardElement.classList.remove("board-animation");
+      }, 600);  // Match the duration of the longest animation (0.5s + delay)
+    }
+
     
       // Add the animation class to the board
       boardElement.classList.add("board-animation");
@@ -593,6 +645,7 @@
         gameOver = false;
       }, 500);  // Wait for disappearing animation to finish
     });
+
 
 
     createBoard();
