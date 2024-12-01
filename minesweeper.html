@@ -268,6 +268,10 @@
           cell.dataset.col = c;
           cell.addEventListener('click', () => handleClick(r, c));
           cell.addEventListener('touchstart', (e) => handleTouchStart(e, r, c));
+          cell.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            placeFlag(r, c);
+          });
           gameContainer.appendChild(cell);
         }
       }
@@ -281,6 +285,8 @@
         firstClick = false;
       }
 
+      if (gameOverFlag) return; // Do nothing if the game is over
+
       const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
       if (cell.classList.contains('revealed') || cell.classList.contains('flag')) return;
 
@@ -288,6 +294,28 @@
         gameOver(false);
       } else {
         revealCell(row, col);
+      }
+    }
+
+    function handleTouchStart(event, row, col) {
+      if (gameOverFlag) return; // Do nothing if the game is over
+
+      event.preventDefault(); // Prevent mouse click
+      placeFlag(row, col); // Place flag on touch
+    }
+
+    function placeFlag(row, col) {
+      if (gameOverFlag) return; // Do nothing if the game is over
+
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      if (!cell.classList.contains('revealed') && flagsLeft > 0 && !cell.classList.contains('flag')) {
+        cell.classList.add('flag');
+        flagsLeft--;
+        flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
+      } else if (cell.classList.contains('flag')) {
+        cell.classList.remove('flag');
+        flagsLeft++;
+        flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
       }
     }
 
@@ -328,19 +356,19 @@
       }
     }
 
+    let gameOverFlag = false;
+
     function gameOver(won) {
+      gameOverFlag = true;
       stopTimer();
       const cells = document.querySelectorAll('.cell');
       cells.forEach(cell => {
-        cell.removeEventListener('click', () => handleClick(row, col)); // Disable click
-        cell.removeEventListener('touchstart', (e) => handleTouchStart(e, row, col)); // Disable touch
+        cell.removeEventListener('click', () => handleClick());
+        cell.removeEventListener('touchstart', (e) => handleTouchStart(e));
       });
 
       if (won) {
-        // Check if all flags are placed correctly
         checkFlags();
-
-        // If flags are correctly placed, show Win
         if (flaggedCells === mines && correctlyFlaggedCells === mines) {
           gameResultDisplay.textContent = 'You Win!';
           if (!bestTime || currentTime < bestTime) {
@@ -356,7 +384,7 @@
         revealMines();
       }
 
-      newGameBtn.style.display = 'block'; // Show New Game button
+      newGameBtn.style.display = 'block';
     }
 
     function checkFlags() {
@@ -386,9 +414,8 @@
       });
     }
 
-    // Return to the menu (index page)
     function returnToMenu() {
-      window.location.href = 'index.html'; // Make sure this points to your actual index page
+      window.location.href = 'index.html';
     }
 
     initGame();
