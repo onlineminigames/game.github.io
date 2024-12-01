@@ -134,6 +134,7 @@
           cell.dataset.col = c;
           cell.addEventListener('click', () => handleClick(r, c));
           cell.addEventListener('touchstart', (e) => handleTouchStart(e, r, c));
+          cell.addEventListener('touchend', (e) => handleTouchEnd(e, r, c));
           gameContainer.appendChild(cell);
         }
       }
@@ -141,15 +142,25 @@
 
     let touchStartTime = 0;
     let touchTimer = null;
+    let activeCell = null;
 
     function handleTouchStart(e, row, col) {
       e.preventDefault(); // Prevent default behavior like zoom
-      if (touchTimer) clearTimeout(touchTimer);
-
+      activeCell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
       touchStartTime = Date.now();
-      touchTimer = setTimeout(() => {
+    }
+
+    function handleTouchEnd(e, row, col) {
+      const touchDuration = Date.now() - touchStartTime;
+
+      if (touchDuration < 500) {
+        // Short touch: reveal the cell
+        handleClick(row, col);
+      } else {
+        // Long touch: place a flag
         toggleFlag(row, col);
-      }, 500); // If held for more than 500ms, toggle the flag
+      }
+      activeCell = null;
     }
 
     function handleClick(row, col) {
