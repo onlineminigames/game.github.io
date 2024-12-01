@@ -112,7 +112,7 @@
   </header>
   <div id="info-container">
     <div id="flag-count">Flags Left: 20</div>
-    <div id="timer">Time: 0</div>
+    <div id="timer">Time: 00:00</div>
     <div id="best-time">Best Time: --</div>
   </div>
   <button id="return-btn" onclick="returnToMenu()">Return to Menu</button> <!-- Return to Menu Button -->
@@ -149,7 +149,7 @@
       flagsLeft = mines;
       firstClick = true;
       currentTime = 0;
-      timerDisplay.textContent = `Time: 0`;
+      timerDisplay.textContent = `Time: 00:00`;
       flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
 
       renderBoard();
@@ -159,7 +159,9 @@
       startTime = Date.now();
       timer = setInterval(() => {
         currentTime = Math.floor((Date.now() - startTime) / 1000);
-        timerDisplay.textContent = `Time: ${currentTime}`;
+        const minutes = String(Math.floor(currentTime / 60)).padStart(2, '0');
+        const seconds = String(currentTime % 60).padStart(2, '0');
+        timerDisplay.textContent = `Time: ${minutes}:${seconds}`;
       }, 1000);
     }
 
@@ -267,8 +269,8 @@
         firstClickRow = row;
         firstClickCol = col;
         placeMines(firstClickRow, firstClickCol); // Avoid placing mines on first clicked cell and its neighbors
-        calculateNumbers(); // Recalculate numbers after placing mines
-        startTimer(); // Start timer on first click
+        calculateNumbers(); // Recalculate numbers after mines are placed
+        startTimer();
         firstClick = false;
       }
 
@@ -342,6 +344,16 @@
         cells.forEach(cell => {
           if (cell.classList.contains('flag') && !cell.classList.contains('revealed')) {
             cell.classList.add('incorrect'); // Mark incorrectly placed flags in red
+          }
+        });
+
+        // Reveal all mines at the end of the game
+        const mineCells = document.querySelectorAll('.cell');
+        mineCells.forEach(cell => {
+          const row = parseInt(cell.dataset.row);
+          const col = parseInt(cell.dataset.col);
+          if (board[row][col] === 'M' && !cell.classList.contains('revealed')) {
+            cell.classList.add('mine');
           }
         });
       }
