@@ -104,6 +104,21 @@
     #return-btn:hover {
       background-color: #45a049;
     }
+
+    #new-game-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 1.2em;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #new-game-btn:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
@@ -117,6 +132,8 @@
   </div>
   <button id="return-btn" onclick="returnToMenu()">Return to Menu</button> <!-- Return to Menu Button -->
   <div id="game-container"></div>
+  <button id="new-game-btn" style="display: none;" onclick="initGame()">New Game</button> <!-- New Game Button -->
+  
   <script>
     // Minesweeper JavaScript
     const rows = 10;
@@ -126,6 +143,7 @@
     const flagCountDisplay = document.getElementById('flag-count');
     const timerDisplay = document.getElementById('timer');
     const bestTimeDisplay = document.getElementById('best-time');
+    const newGameBtn = document.getElementById('new-game-btn');
 
     let board = [];
     let revealedCells = 0;
@@ -143,6 +161,7 @@
     }
 
     function initGame() {
+      newGameBtn.style.display = 'none'; // Hide New Game button at the start
       gameContainer.innerHTML = '';
       board = Array.from({ length: rows }, () => Array(cols).fill(0));
       revealedCells = 0;
@@ -253,23 +272,26 @@
 
     function handleTouchEnd(e, row, col) {
       const touchDuration = Date.now() - touchStartTime;
-
-      if (touchDuration < 500) {
-        // Short touch: reveal the cell
-        handleClick(row, col);
+      if (touchDuration < 300) {
+        handleClick(row, col); // Regular click
       } else {
-        // Long touch: place a flag
-        toggleFlag(row, col);
+        toggleFlag(row, col); // Long press to flag
       }
-      activeCell = null;
     }
 
     function handleClick(row, col) {
+      if (!firstClick) return; // Prevent clicks after game over
+      if (board[row][col] === 'M') {
+        gameOver(false);
+      } else {
+        revealCell(row, col);
+      }
+    }
+
+    function revealCell(row, col) {
       if (firstClick) {
-        firstClickRow = row;
-        firstClickCol = col;
-        placeMines(firstClickRow, firstClickCol); // Avoid placing mines on first clicked cell and its neighbors
-        calculateNumbers(); // Recalculate numbers after mines are placed
+        placeMines(row, col);
+        calculateNumbers();
         startTimer();
         firstClick = false;
       }
@@ -338,9 +360,16 @@
         bestTimeDisplay.textContent = `Best Time: ${bestTime}`;
       }
 
+      // Disable all cells after game ends
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        cell.removeEventListener('click', () => handleClick(row, col)); // Disable click
+        cell.removeEventListener('touchstart', (e) => handleTouchStart(e, row, col)); // Disable touch
+        cell.removeEventListener('touchend', (e) => handleTouchEnd(e, row, col)); // Disable touch
+      });
+
       // Show remaining flags in red if game is over
       if (!won) {
-        const cells = document.querySelectorAll('.cell');
         cells.forEach(cell => {
           if (cell.classList.contains('flag') && !cell.classList.contains('revealed')) {
             cell.classList.add('incorrect'); // Mark incorrectly placed flags in red
@@ -348,8 +377,7 @@
         });
 
         // Reveal all mines at the end of the game
-        const mineCells = document.querySelectorAll('.cell');
-        mineCells.forEach(cell => {
+        cells.forEach(cell => {
           const row = parseInt(cell.dataset.row);
           const col = parseInt(cell.dataset.col);
           if (board[row][col] === 'M' && !cell.classList.contains('revealed')) {
@@ -358,6 +386,7 @@
         });
       }
 
+      newGameBtn.style.display = 'block'; // Show New Game button after game over
       alert(won ? 'You won!' : 'Game over!');
     }
 
