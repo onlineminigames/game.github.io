@@ -266,14 +266,43 @@
           cell.classList.add('cell');
           cell.dataset.row = r;
           cell.dataset.col = c;
+
+          // Touch and click handling
+          let touchTimeout;
           cell.addEventListener('click', () => handleClick(r, c));
           cell.addEventListener('touchstart', (e) => handleTouchStart(e, r, c));
+
+          // Context menu (right-click) to place flag
           cell.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             placeFlag(r, c);
           });
+
           gameContainer.appendChild(cell);
         }
+      }
+    }
+
+    let touchStartTime;
+
+    function handleTouchStart(event, row, col) {
+      if (gameOverFlag) return; // Do nothing if the game is over
+
+      event.preventDefault(); // Prevent default touch behavior
+
+      touchStartTime = Date.now(); // Track the time when touch starts
+
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      
+      // Set a timeout to detect long touch
+      setTimeout(() => {
+        if (Date.now() - touchStartTime >= 500) {
+          placeFlag(row, col); // Place flag if the touch duration is long
+        }
+      }, 500); // 500ms for long touch (flag placement)
+      
+      if (Date.now() - touchStartTime < 500) {
+        handleClick(row, col); // Reveal cell if the touch duration is short
       }
     }
 
@@ -295,13 +324,6 @@
       } else {
         revealCell(row, col);
       }
-    }
-
-    function handleTouchStart(event, row, col) {
-      if (gameOverFlag) return; // Do nothing if the game is over
-
-      event.preventDefault(); // Prevent mouse click
-      placeFlag(row, col); // Place flag on touch
     }
 
     function placeFlag(row, col) {
