@@ -283,8 +283,6 @@
       }
     }
 
-    let touchStartTime;
-
     function handleTouchStart(event, row, col) {
       if (gameOverFlag) return; // Do nothing if the game is over
 
@@ -293,14 +291,14 @@
       touchStartTime = Date.now(); // Track the time when touch starts
 
       const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-      
+
       // Set a timeout to detect long touch
       setTimeout(() => {
         if (Date.now() - touchStartTime >= 500) {
           placeFlag(row, col); // Place flag if the touch duration is long
         }
       }, 500); // 500ms for long touch (flag placement)
-      
+
       if (Date.now() - touchStartTime < 500) {
         handleClick(row, col); // Reveal cell if the touch duration is short
       }
