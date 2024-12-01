@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minesweeper</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+    .container {
+      text-align: center;
+    }
+    h1 {
+      color: white;
+      font-size: 3em;
+      margin-bottom: 0.5em;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .game {
+      display: grid;
+      gap: 2px;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      background: #eee;
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cell:hover {
+      background: #ddd;
+      transform: scale(1.1);
+    }
+    .cell.revealed {
+      background: #fff;
+      cursor: default;
+      transform: scale(1);
+    }
+    .cell.mine {
+      background: red;
+      color: white;
+    }
+    .cell.flag {
+      background: #007bff;
+      color: white;
+    }
+    .info {
+      margin: 1em 0;
+      color: white;
+      font-size: 1.2em;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Minesweeper</h1>
+    <div class="info">High Score: <span id="high-score">0</span></div>
+    <div id="game" class="game"></div>
+    <button onclick="startGame()">Restart Game</button>
+  </div>
+
+  <script>
+    const rows = 10;
+    const cols = 10;
+    const mineCount = 15;
+    const gameElement = document.getElementById('game');
+    const highScoreElement = document.getElementById('high-score');
+    let board = [];
+    let revealedCount = 0;
+    let startTime;
+
+    // Initialize the game
+    function startGame() {
+      gameElement.innerHTML = '';
+      board = [];
+      revealedCount = 0;
+      startTime = Date.now();
+      highScoreElement.textContent = localStorage.getItem('highScore') || 0;
+      createBoard();
+    }
+
+    function createBoard() {
+      board = Array.from({ length: rows }, () => Array(cols).fill(0));
+      placeMines();
+      calculateNumbers();
+      renderBoard();
+    }
+
+    function placeMines() {
+      let placed = 0;
+      while (placed < mineCount) {
+        const r = Math.floor(Math.random() * rows);
+        const c = Math.floor(Math.random() * cols);
+        if (board[r][c] !== 'M') {
+          board[r][c] = 'M';
+          placed++;
+        }
+      }
+    }
+
+    function calculateNumbers() {
+      const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],          [0, 1],
+        [1, -1], [1, 0], [1, 1]
+      ];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (board[r][c] === 'M') continue;
+
+          let mines = 0;
+          for (const [dr, dc] of directions) {
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc] === 'M') {
+              mines++;
+            }
+          }
+          board[r][c] = mines;
+        }
+      }
+    }
+
+    function renderBoard() {
+      gameElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+      gameElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener('click', () => revealCell(r, c));
+          cell.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            toggleFlag(cell);
+          });
+          gameElement.appendChild(cell);
+        }
+      }
+    }
+
+    function revealCell(r, c) {
+      const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+      if (!cell || cell.classList.contains('revealed') || cell.classList.contains('flag')) return;
+
+      cell.classList.add('revealed');
+      const value = board[r][c];
+
+      if (value === 'M') {
+        cell.classList.add('mine');
+        endGame(false);
+        return;
+      }
+
+      revealedCount++;
+      cell.textContent = value > 0 ? value : '';
+
+      if (value === 0) {
+        const directions = [
+          [-1, -1], [-1, 0], [-1, 1],
+          [0, -1],          [0, 1],
+          [1, -1], [1, 0], [1, 1]
+        ];
+
+        for (const [dr, dc] of directions) {
+          revealCell(r + dr, c + dc);
+        }
+      }
+
+      if (revealedCount === rows * cols - mineCount) {
+        endGame(true);
+      }
+    }
+
+    function toggleFlag(cell) {
+      if (cell.classList.contains('revealed')) return;
+      cell.classList.toggle('flag');
+      cell.textContent = cell.classList.contains('flag') ? 'F' : '';
+    }
+
+    function endGame(won) {
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach((cell) => cell.classList.add('revealed'));
+
+      if (won) {
+        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+        const highScore = localStorage.getItem('highScore');
+
+        if (!highScore || timeTaken < highScore) {
+          localStorage.setItem('highScore', timeTaken);
+          highScoreElement.textContent = timeTaken;
+          alert(`You win! New high score: ${timeTaken}s`);
+        } else {
+          alert(`You win! Time: ${timeTaken}s`);
+        }
+      } else {
+        alert('Game Over! You hit a mine.');
+      }
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
