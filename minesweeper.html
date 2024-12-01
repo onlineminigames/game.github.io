@@ -119,6 +119,13 @@
     #new-game-btn:hover {
       background-color: #45a049;
     }
+
+    #game-result {
+      margin-top: 20px;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -133,7 +140,8 @@
   <button id="return-btn" onclick="returnToMenu()">Return to Menu</button> <!-- Return to Menu Button -->
   <div id="game-container"></div>
   <button id="new-game-btn" style="display: none;" onclick="initGame()">New Game</button> <!-- New Game Button -->
-  
+  <div id="game-result"></div> <!-- Game Result Display -->
+
   <script>
     // Minesweeper JavaScript
     const rows = 10;
@@ -144,6 +152,7 @@
     const timerDisplay = document.getElementById('timer');
     const bestTimeDisplay = document.getElementById('best-time');
     const newGameBtn = document.getElementById('new-game-btn');
+    const gameResultDisplay = document.getElementById('game-result');
 
     let board = [];
     let revealedCells = 0;
@@ -153,6 +162,8 @@
     let timer;
     let startTime;
     let currentTime = 0;
+    let flaggedCells = 0; // Tracks the number of flagged cells
+    let correctlyFlaggedCells = 0; // Tracks the correctly flagged cells
 
     // Get the best time from localStorage if available
     let bestTime = localStorage.getItem('bestTime');
@@ -162,10 +173,13 @@
 
     function initGame() {
       newGameBtn.style.display = 'none'; // Hide New Game button at the start
+      gameResultDisplay.textContent = ''; // Clear game result text
       gameContainer.innerHTML = '';
       board = Array.from({ length: rows }, () => Array(cols).fill(0));
       revealedCells = 0;
       flagsLeft = mines;
+      flaggedCells = 0;
+      correctlyFlaggedCells = 0;
       firstClick = true;
       currentTime = 0;
       timerDisplay.textContent = `Time: 00:00`;
@@ -254,41 +268,12 @@
           cell.dataset.col = c;
           cell.addEventListener('click', () => handleClick(r, c));
           cell.addEventListener('touchstart', (e) => handleTouchStart(e, r, c));
-          cell.addEventListener('touchend', (e) => handleTouchEnd(e, r, c));
           gameContainer.appendChild(cell);
         }
       }
     }
 
-    let touchStartTime = 0;
-    let touchTimer = null;
-    let activeCell = null;
-
-    function handleTouchStart(e, row, col) {
-      e.preventDefault(); // Prevent default behavior like zoom
-      activeCell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-      touchStartTime = Date.now();
-    }
-
-    function handleTouchEnd(e, row, col) {
-      const touchDuration = Date.now() - touchStartTime;
-      if (touchDuration < 300) {
-        handleClick(row, col); // Regular click
-      } else {
-        toggleFlag(row, col); // Long press to flag
-      }
-    }
-
     function handleClick(row, col) {
-      if (!firstClick) return; // Prevent clicks after game over
-      if (board[row][col] === 'M') {
-        gameOver(false);
-      } else {
-        revealCell(row, col);
-      }
-    }
-
-    function revealCell(row, col) {
       if (firstClick) {
         placeMines(row, col);
         calculateNumbers();
@@ -298,6 +283,17 @@
 
       const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
       if (cell.classList.contains('revealed') || cell.classList.contains('flag')) return;
+
+      if (board[row][col] === 'M') {
+        gameOver(false);
+      } else {
+        revealCell(row, col);
+      }
+    }
+
+    function revealCell(row, col) {
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      if (cell.classList.contains('revealed')) return;
 
       cell.classList.add('revealed');
       revealedCells++;
@@ -327,67 +323,67 @@
         const nr = row + dr;
         const nc = col + dc;
         if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-          const cell = document.querySelector(`.cell[data-row="${nr}"][data-col="${nc}"]`);
-          if (!cell.classList.contains('revealed') && !cell.classList.contains('flag')) {
-            handleClick(nr, nc);
-          }
+          revealCell(nr, nc);
         }
       }
-    }
-
-    function toggleFlag(row, col) {
-      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-      if (cell.classList.contains('revealed')) return;
-
-      cell.classList.toggle('flag');
-      if (cell.classList.contains('flag')) {
-        flagsLeft--;
-      } else {
-        flagsLeft++;
-      }
-
-      flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
-      cell.textContent = cell.classList.contains('flag') ? 'F' : '';
     }
 
     function gameOver(won) {
       stopTimer();
-      if (won) {
-        if (!bestTime || currentTime < bestTime) {
-          bestTime = currentTime;
-          localStorage.setItem('bestTime', bestTime);
-        }
-        bestTimeDisplay.textContent = `Best Time: ${bestTime}`;
-      }
-
-      // Disable all cells after game ends
       const cells = document.querySelectorAll('.cell');
       cells.forEach(cell => {
         cell.removeEventListener('click', () => handleClick(row, col)); // Disable click
         cell.removeEventListener('touchstart', (e) => handleTouchStart(e, row, col)); // Disable touch
-        cell.removeEventListener('touchend', (e) => handleTouchEnd(e, row, col)); // Disable touch
       });
 
-      // Show remaining flags in red if game is over
-      if (!won) {
-        cells.forEach(cell => {
-          if (cell.classList.contains('flag') && !cell.classList.contains('revealed')) {
-            cell.classList.add('incorrect'); // Mark incorrectly placed flags in red
-          }
-        });
+      if (won) {
+        // Check if all flags are placed correctly
+        checkFlags();
 
-        // Reveal all mines at the end of the game
-        cells.forEach(cell => {
-          const row = parseInt(cell.dataset.row);
-          const col = parseInt(cell.dataset.col);
-          if (board[row][col] === 'M' && !cell.classList.contains('revealed')) {
-            cell.classList.add('mine');
+        // If flags are correctly placed, show Win
+        if (flaggedCells === mines && correctlyFlaggedCells === mines) {
+          gameResultDisplay.textContent = 'You Win!';
+          if (!bestTime || currentTime < bestTime) {
+            bestTime = currentTime;
+            localStorage.setItem('bestTime', bestTime);
           }
-        });
+          bestTimeDisplay.textContent = `Best Time: ${bestTime}`;
+        } else {
+          gameResultDisplay.textContent = 'You Lose!';
+        }
+      } else {
+        gameResultDisplay.textContent = 'Game Over!';
+        revealMines();
       }
 
-      newGameBtn.style.display = 'block'; // Show New Game button after game over
-      alert(won ? 'You won!' : 'Game over!');
+      newGameBtn.style.display = 'block'; // Show New Game button
+    }
+
+    function checkFlags() {
+      const cells = document.querySelectorAll('.cell');
+      flaggedCells = 0;
+      correctlyFlaggedCells = 0;
+      cells.forEach(cell => {
+        if (cell.classList.contains('flag')) {
+          flaggedCells++;
+          const row = parseInt(cell.dataset.row);
+          const col = parseInt(cell.dataset.col);
+          if (board[row][col] === 'M') {
+            correctlyFlaggedCells++;
+          }
+        }
+      });
+    }
+
+    function revealMines() {
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        if (board[row][col] === 'M' && !cell.classList.contains('revealed')) {
+          cell.classList.add('mine');
+        }
+      });
     }
 
     // Return to the menu (index page)
