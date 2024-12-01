@@ -5,234 +5,193 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minesweeper</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-    }
-    .container {
-      text-align: center;
-    }
-    h1 {
-      color: white;
-      font-size: 3em;
-      margin-bottom: 0.5em;
-      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-    }
-    .game {
-      display: grid;
-      gap: 2px;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-    .cell {
-      width: 40px;
-      height: 40px;
-      background: #eee;
-      border-radius: 4px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.2em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .cell:hover {
-      background: #ddd;
-      transform: scale(1.1);
-    }
-    .cell.revealed {
-      background: #fff;
-      cursor: default;
-      transform: scale(1);
-    }
-    .cell.mine {
-      background: red;
-      color: white;
-    }
-    .cell.flag {
-      background: #007bff;
-      color: white;
-    }
-    .info {
-      margin: 1em 0;
-      color: white;
-      font-size: 1.2em;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
+/* Minesweeper CSS */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  margin-top: 20px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 2.5em;
+  color: #333;
+}
+
+#game-container {
+  margin: 20px 0;
+  display: grid;
+  gap: 1px;
+  background-color: #333;
+  padding: 5px;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  background-color: #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cell.revealed {
+  background-color: #9ca3af;
+  cursor: default;
+}
+
+.cell.mine {
+  background-color: red;
+  color: white;
+}
+
+.cell.flag {
+  background-color: #60a5fa;
+  color: white;
+}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Minesweeper</h1>
-    <div class="info">High Score: <span id="high-score">0</span></div>
-    <div id="game" class="game"></div>
-    <button onclick="startGame()">Restart Game</button>
-  </div>
+<header>
+  <h1>Minesweeper</h1>
+</header>
+<div id="game-container"></div>
+<script>
+// Minesweeper JavaScript
+const rows = 10;
+const cols = 10;
+const mines = 20;
+const gameContainer = document.getElementById('game-container');
 
-  <script>
-    const rows = 10;
-    const cols = 10;
-    const mineCount = 15;
-    const gameElement = document.getElementById('game');
-    const highScoreElement = document.getElementById('high-score');
-    let board = [];
-    let revealedCount = 0;
-    let startTime;
+let board = [];
+let revealedCells = 0;
 
-    // Initialize the game
-    function startGame() {
-      gameElement.innerHTML = '';
-      board = [];
-      revealedCount = 0;
-      startTime = Date.now();
-      highScoreElement.textContent = localStorage.getItem('highScore') || 0;
-      createBoard();
+function initGame() {
+  gameContainer.innerHTML = '';
+  board = Array.from({ length: rows }, () => Array(cols).fill(0));
+  revealedCells = 0;
+
+  placeMines();
+  calculateNumbers();
+  renderBoard();
+}
+
+function placeMines() {
+  let placed = 0;
+  while (placed < mines) {
+    const row = Math.floor(Math.random() * rows);
+    const col = Math.floor(Math.random() * cols);
+    if (board[row][col] === 0) {
+      board[row][col] = 'M';
+      placed++;
     }
+  }
+}
 
-    function createBoard() {
-      board = Array.from({ length: rows }, () => Array(cols).fill(0));
-      placeMines();
-      calculateNumbers();
-      renderBoard();
-    }
+function calculateNumbers() {
+  const directions = [
+    [-1, -1], [-1, 0], [-1, 1],
+    [0, -1],         [0, 1],
+    [1, -1], [1, 0], [1, 1],
+  ];
 
-    function placeMines() {
-      let placed = 0;
-      while (placed < mineCount) {
-        const r = Math.floor(Math.random() * rows);
-        const c = Math.floor(Math.random() * cols);
-        if (board[r][c] !== 'M') {
-          board[r][c] = 'M';
-          placed++;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (board[r][c] === 'M') continue;
+
+      let count = 0;
+      for (const [dr, dc] of directions) {
+        const nr = r + dr;
+        const nc = c + dc;
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc] === 'M') {
+          count++;
         }
       }
+      board[r][c] = count;
     }
+  }
+}
 
-    function calculateNumbers() {
-      const directions = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],          [0, 1],
-        [1, -1], [1, 0], [1, 1]
-      ];
+function renderBoard() {
+  gameContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  gameContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (board[r][c] === 'M') continue;
-
-          let mines = 0;
-          for (const [dr, dc] of directions) {
-            const nr = r + dr;
-            const nc = c + dc;
-            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc] === 'M') {
-              mines++;
-            }
-          }
-          board[r][c] = mines;
-        }
-      }
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener('click', () => handleClick(r, c));
+      cell.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        toggleFlag(cell);
+      });
+      gameContainer.appendChild(cell);
     }
+  }
+}
 
-    function renderBoard() {
-      gameElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-      gameElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+function handleClick(row, col) {
+  const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+  if (!cell || cell.classList.contains('revealed') || cell.classList.contains('flag')) return;
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const cell = document.createElement('div');
-          cell.classList.add('cell');
-          cell.dataset.row = r;
-          cell.dataset.col = c;
-          cell.addEventListener('click', () => revealCell(r, c));
-          cell.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            toggleFlag(cell);
-          });
-          gameElement.appendChild(cell);
-        }
-      }
+  cell.classList.add('revealed');
+  const value = board[row][col];
+
+  if (value === 'M') {
+    cell.classList.add('mine');
+    alert('Game Over!');
+    initGame();
+    return;
+  }
+
+  revealedCells++;
+  if (value > 0) {
+    cell.textContent = value;
+  } else {
+    revealAdjacent(row, col);
+  }
+
+  if (revealedCells === rows * cols - mines) {
+    alert('You Win!');
+    initGame();
+  }
+}
+
+function revealAdjacent(row, col) {
+  const directions = [
+    [-1, -1], [-1, 0], [-1, 1],
+    [0, -1],         [0, 1],
+    [1, -1], [1, 0], [1, 1],
+  ];
+
+  for (const [dr, dc] of directions) {
+    const nr = row + dr;
+    const nc = col + dc;
+    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+      handleClick(nr, nc);
     }
+  }
+}
 
-    function revealCell(r, c) {
-      const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
-      if (!cell || cell.classList.contains('revealed') || cell.classList.contains('flag')) return;
+function toggleFlag(cell) {
+  if (cell.classList.contains('revealed')) return;
+  cell.classList.toggle('flag');
+  cell.textContent = cell.classList.contains('flag') ? 'F' : '';
+}
 
-      cell.classList.add('revealed');
-      const value = board[r][c];
-
-      if (value === 'M') {
-        cell.classList.add('mine');
-        endGame(false);
-        return;
-      }
-
-      revealedCount++;
-      cell.textContent = value > 0 ? value : '';
-
-      if (value === 0) {
-        const directions = [
-          [-1, -1], [-1, 0], [-1, 1],
-          [0, -1],          [0, 1],
-          [1, -1], [1, 0], [1, 1]
-        ];
-
-        for (const [dr, dc] of directions) {
-          revealCell(r + dr, c + dc);
-        }
-      }
-
-      if (revealedCount === rows * cols - mineCount) {
-        endGame(true);
-      }
-    }
-
-    function toggleFlag(cell) {
-      if (cell.classList.contains('revealed')) return;
-      cell.classList.toggle('flag');
-      cell.textContent = cell.classList.contains('flag') ? 'F' : '';
-    }
-
-    function endGame(won) {
-      const cells = document.querySelectorAll('.cell');
-      cells.forEach((cell) => cell.classList.add('revealed'));
-
-      if (won) {
-        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-        const highScore = localStorage.getItem('highScore');
-
-        if (!highScore || timeTaken < highScore) {
-          localStorage.setItem('highScore', timeTaken);
-          highScoreElement.textContent = timeTaken;
-          alert(`You win! New high score: ${timeTaken}s`);
-        } else {
-          alert(`You win! Time: ${timeTaken}s`);
-        }
-      } else {
-        alert('Game Over! You hit a mine.');
-      }
-    }
-
-    startGame();
-  </script>
+initGame();
+</script>
 </body>
 </html>
