@@ -26,12 +26,6 @@
       color: #333;
     }
 
-    #flag-count {
-      font-size: 1.5em;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
     #game-container {
       margin: 20px 0;
       display: grid;
@@ -41,15 +35,14 @@
     }
 
     .cell {
-      width: 40px; /* Increased size */
-      height: 40px; /* Increased size */
+      width: 30px;
+      height: 30px;
       background-color: #e5e7eb;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       font-weight: bold;
-      font-size: 1.2em;
     }
 
     .cell.revealed {
@@ -72,7 +65,6 @@
   <header>
     <h1>Minesweeper</h1>
   </header>
-  <div id="flag-count">Flags Left: 20</div> <!-- Display remaining flags -->
   <div id="game-container"></div>
   <script>
     // Minesweeper JavaScript
@@ -80,18 +72,14 @@
     const cols = 10;
     const mines = 20;
     const gameContainer = document.getElementById('game-container');
-    const flagCountDisplay = document.getElementById('flag-count');
 
     let board = [];
     let revealedCells = 0;
-    let flagsLeft = mines;
 
     function initGame() {
       gameContainer.innerHTML = '';
       board = Array.from({ length: rows }, () => Array(cols).fill(0));
       revealedCells = 0;
-      flagsLeft = mines;
-      flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
 
       placeMines();
       calculateNumbers();
@@ -221,15 +209,7 @@
     function toggleFlag(row, col) {
       const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
       if (cell.classList.contains('revealed')) return;
-
       cell.classList.toggle('flag');
-      if (cell.classList.contains('flag')) {
-        flagsLeft--;
-      } else {
-        flagsLeft++;
-      }
-
-      flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
       cell.textContent = cell.classList.contains('flag') ? 'F' : '';
     }
 
