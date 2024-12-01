@@ -26,10 +26,27 @@
       color: #333;
     }
 
+    #info-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
     #flag-count {
       font-size: 1.5em;
-      margin-bottom: 20px;
+      margin-right: 20px;
       color: #333;
+    }
+
+    #timer {
+      font-size: 1.5em;
+      color: #333;
+    }
+
+    #best-time {
+      font-size: 1.2em;
+      color: #333;
+      margin-left: 20px;
     }
 
     #game-container {
@@ -89,7 +106,11 @@
   <header>
     <h1>Minesweeper</h1>
   </header>
-  <div id="flag-count">Flags Left: 20</div> <!-- Display remaining flags -->
+  <div id="info-container">
+    <div id="flag-count">Flags Left: 20</div>
+    <div id="timer">Time: 0</div>
+    <div id="best-time">Best Time: --</div>
+  </div>
   <button id="return-btn" onclick="returnToMenu()">Return to Menu</button> <!-- Return to Menu Button -->
   <div id="game-container"></div>
   <script>
@@ -99,12 +120,23 @@
     const mines = 20;
     const gameContainer = document.getElementById('game-container');
     const flagCountDisplay = document.getElementById('flag-count');
+    const timerDisplay = document.getElementById('timer');
+    const bestTimeDisplay = document.getElementById('best-time');
 
     let board = [];
     let revealedCells = 0;
     let flagsLeft = mines;
     let firstClick = true;
     let firstClickRow, firstClickCol;
+    let timer;
+    let startTime;
+    let currentTime = 0;
+
+    // Get the best time from localStorage if available
+    let bestTime = localStorage.getItem('bestTime');
+    if (bestTime) {
+      bestTimeDisplay.textContent = `Best Time: ${bestTime}`;
+    }
 
     function initGame() {
       gameContainer.innerHTML = '';
@@ -112,9 +144,23 @@
       revealedCells = 0;
       flagsLeft = mines;
       firstClick = true;
+      currentTime = 0;
+      timerDisplay.textContent = `Time: 0`;
       flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
 
       renderBoard();
+    }
+
+    function startTimer() {
+      startTime = Date.now();
+      timer = setInterval(() => {
+        currentTime = Math.floor((Date.now() - startTime) / 1000);
+        timerDisplay.textContent = `Time: ${currentTime}`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timer);
     }
 
     function placeMines(excludeRow, excludeCol) {
@@ -218,6 +264,7 @@
         firstClickCol = col;
         placeMines(firstClickRow, firstClickCol); // Avoid placing mines on first clicked cell and its neighbors
         calculateNumbers(); // Recalculate numbers after placing mines
+        startTimer(); // Start timer on first click
         firstClick = false;
       }
 
@@ -225,29 +272,23 @@
       if (!cell || cell.classList.contains('revealed') || cell.classList.contains('flag')) return;
 
       cell.classList.add('revealed');
-      const value = board[row][col];
-
-      if (value === 'M') {
-        cell.classList.add('mine');
-        alert('Game Over!');
-        initGame();
-        return;
-      }
-
       revealedCells++;
-      if (value > 0) {
-        cell.textContent = value;
+
+      if (board[row][col] === 'M') {
+        cell.classList.add('mine');
+        gameOver(false);
+      } else if (board[row][col] === 0) {
+        revealAdjacentCells(row, col);
       } else {
-        revealAdjacent(row, col);
+        cell.textContent = board[row][col];
       }
 
-      if (revealedCells === rows * cols - mines) {
-        alert('You Win!');
-        initGame();
+      if (revealedCells === (rows * cols - mines)) {
+        gameOver(true);
       }
     }
 
-    function revealAdjacent(row, col) {
+    function revealAdjacentCells(row, col) {
       const directions = [
         [-1, -1], [-1, 0], [-1, 1],
         [0, -1],         [0, 1],
@@ -258,7 +299,10 @@
         const nr = row + dr;
         const nc = col + dc;
         if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-          handleClick(nr, nc);
+          const cell = document.querySelector(`.cell[data-row="${nr}"][data-col="${nc}"]`);
+          if (!cell.classList.contains('revealed') && !cell.classList.contains('flag')) {
+            handleClick(nr, nc);
+          }
         }
       }
     }
@@ -276,6 +320,18 @@
 
       flagCountDisplay.textContent = `Flags Left: ${flagsLeft}`;
       cell.textContent = cell.classList.contains('flag') ? 'F' : '';
+    }
+
+    function gameOver(won) {
+      stopTimer();
+      if (won) {
+        if (!bestTime || currentTime < bestTime) {
+          bestTime = currentTime;
+          localStorage.setItem('bestTime', bestTime);
+        }
+        bestTimeDisplay.textContent = `Best Time: ${bestTime}`;
+      }
+      alert(won ? 'You won!' : 'Game over!');
     }
 
     // Return to the menu (index page)
