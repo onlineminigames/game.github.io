@@ -104,6 +104,7 @@
     let revealedCells = 0;
     let flagsLeft = mines;
     let firstClick = true;
+    let firstClickRow, firstClickCol;
 
     function initGame() {
       gameContainer.innerHTML = '';
@@ -121,11 +122,29 @@
       while (placed < mines) {
         const row = Math.floor(Math.random() * rows);
         const col = Math.floor(Math.random() * cols);
-        if (board[row][col] === 0 && !(row === excludeRow && col === excludeCol)) {
+
+        // Skip placing mines on the first click cell or its adjacent cells
+        if (board[row][col] === 0 &&
+            !(row === excludeRow && col === excludeCol) &&
+            !isAdjacent(row, col, excludeRow, excludeCol)) {
           board[row][col] = 'M';
           placed++;
         }
       }
+    }
+
+    function isAdjacent(row, col, excludeRow, excludeCol) {
+      const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],         [0, 1],
+        [1, -1], [1, 0], [1, 1],
+      ];
+      for (const [dr, dc] of directions) {
+        const nr = row + dr;
+        const nc = col + dc;
+        if (nr === excludeRow && nc === excludeCol) return true;
+      }
+      return false;
     }
 
     function calculateNumbers() {
@@ -195,7 +214,9 @@
 
     function handleClick(row, col) {
       if (firstClick) {
-        placeMines(row, col); // Avoid placing a mine on the first clicked cell
+        firstClickRow = row;
+        firstClickCol = col;
+        placeMines(firstClickRow, firstClickCol); // Avoid placing mines on first clicked cell and its neighbors
         calculateNumbers(); // Recalculate numbers after placing mines
         firstClick = false;
       }
